@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lila">
+<meta name="theme-color" content="#5B21B6">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<title>Lila</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--ink:#1d1d1f;--mute:#6e6e73;--acc:#5B21B6}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--ink:#f5f5f7;--mute:#98989d;--acc:#a78bfa}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+ display:flex;align-items:center;justify-content:center;padding:24px 16px;-webkit-font-smoothing:antialiased}
+.c{width:100%;max-width:360px;background:var(--card);border-radius:22px;padding:32px 24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+img{width:72px;height:72px;border-radius:16px;display:block;margin:0 auto 16px}
+h1{font-size:22px;margin:0 0 8px;font-weight:600;letter-spacing:-.01em}
+#line{color:var(--mute);margin:0 0 20px;min-height:3em}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;margin-right:6px;vertical-align:middle;animation:p 1.6s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:.25}50%{opacity:1}}
+button{appearance:none;border:0;border-radius:12px;background:var(--acc);color:#fff;font:600 16px -apple-system,system-ui,sans-serif;padding:12px 22px;cursor:pointer}
+body:not([data-state=asleep]) button{visibility:hidden}
+body[data-state=nokey] .dot{display:none}
+</style></head>
+<body data-state="checking">
+<main class="c"><img src="icon.png" alt=""><h1>Lila</h1>
+<p><span class="dot"></span><span id="line">Finding Lila…</span></p>
+<button id="now" type="button">Try now</button></main>
+<script>window.DOOR={name:"lila",title:"Lila",file:"lila-addr.json",probe:"icon.png"}</script>
+<script src="door.js"></script>
+</body></html>
