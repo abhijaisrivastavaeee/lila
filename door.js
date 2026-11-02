@@ -6,7 +6,7 @@
 (()=>{
 const C=window.DOOR,G='681e3f3ef70fbbcaac90a4b99902d5c5',OWN='abhijaisrivastavaeee',SK='door-'+C.name;
 const $=id=>document.getElementById(id),te=new TextEncoder(),b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-let key=(location.hash||'').slice(1);
+let key=(location.hash||'').slice(1)||new URLSearchParams(location.search).get('k')||'';
 try{if(key)localStorage.setItem(SK,key);else key=localStorage.getItem(SK)||''}catch(e){}
 function show(state,line){document.body.dataset.state=state;$('line').textContent=line}
 if(!key){show('nokey','Open this from the link Maya sent you once. After that it remembers.');return}
