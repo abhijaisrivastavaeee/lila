@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mirror">
+<meta name="theme-color" content="#050406">
+<link rel="manifest" id="mf" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Mirror</title>
+<style>
+/* The Mirror door (3 Nov 2026). One home screen link that never changes. The mirror itself lives on Jai's Mac and is only reachable while it is awake. */
+:root{--bg:#050406;--ink:#efe7dc;--mute:#9c9188;--acc:#a78bfa;--gold:#d9bf94}
+:root[data-theme="dark"]{--bg:#050406}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);overflow:hidden}
+body{color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+#art{position:fixed;inset:0;width:100%;height:100%;border:0;background:var(--bg);opacity:0;transition:opacity 1.2s ease}
+body[data-state=open] #art{opacity:1}
+#door{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px 16px;
+ background:radial-gradient(120% 80% at 30% 20%,#1a1317 0,#0a080b 55%,#030203 100%);transition:opacity .9s ease}
+body[data-state=open] #door{opacity:0;pointer-events:none}
+.c{max-width:340px;text-align:center}
+.c img{width:96px;height:96px;border-radius:22px;display:block;margin:0 auto 22px;box-shadow:0 0 60px rgba(167,139,250,.18)}
+h1{font:italic 500 34px/1.1 "Cormorant Garamond",Georgia,serif;margin:0 0 6px;letter-spacing:.01em}
+.sub{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--mute);margin:0 0 22px}
+#line{color:var(--mute);margin:0 0 22px;min-height:3em}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--acc);display:inline-block;margin-right:8px;vertical-align:middle;animation:p 1.8s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:.2}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}#art,#door{transition:none}}
+button{appearance:none;border:1px solid rgba(217,191,148,.35);border-radius:999px;background:rgba(255,255,255,.04);color:var(--ink);
+ font:500 15px -apple-system,system-ui,sans-serif;padding:11px 24px;min-height:44px;cursor:pointer}
+body:not([data-state=asleep]) button{visibility:hidden}
+body[data-state=nokey] .dot{display:none}
+</style></head>
+<body data-state="checking">
+<iframe id="art" title="Mirror" allow="camera; autoplay; fullscreen; accelerometer; gyroscope" referrerpolicy="no-referrer"></iframe>
+<div id="door"><main class="c"><img src="icon-512.png" alt=""><h1>Mirror</h1><p class="sub">Jai and Maya</p>
+<p><span class="dot"></span><span id="line">Finding the mirror…</span></p>
+<button id="now" type="button">Try now</button></main></div>
+<script>
+/* Same lock as ~/Maya/doors/site/door.js (AES-GCM address in the secret gist, key only in the #hash and this phone),
+   but the mirror opens inside this page so the home screen app stays the app, and it watches for the Mac to sleep. */
+(()=>{
+const NAME='mirror',FILE='mirror-addr.json',G='681e3f3ef70fbbcaac90a4b99902d5c5',OWN='abhijaisrivastavaeee',SK='door-'+NAME;
+const $=id=>document.getElementById(id),te=new TextEncoder(),b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let key=(location.hash||'').slice(1)||new URLSearchParams(location.search).get('k')||'';
+try{if(key)localStorage.setItem(SK,key);else key=localStorage.getItem(SK)||''}catch(e){}
+function show(s,line){document.body.dataset.state=s;if(line)$('line').textContent=line}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+if(!key){show('nokey','Open this once from the link Jai sent you. After that it remembers.');return}
+// the home screen icon keeps the secret in its start address, so it works even where the app's storage is separate from the browser's
+try{const m={name:'Mirror',short_name:'Mirror',start_url:location.origin+location.pathname+'#'+key,scope:location.origin+location.pathname,display:'standalone',
+ background_color:'#050406',theme_color:'#050406',icons:[180,192,512].map(s=>({src:new URL('icon-'+s+'.png',location.href).href,sizes:s+'x'+s,type:'image/png'}))};
+ $('mf').href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}))}catch(e){}
+let last=null,lastRead=0,cur='',miss=0;
+try{last=JSON.parse(localStorage.getItem(SK+'-last')||'null')}catch(e){}
+async function read(){
+ let t=null;
+ try{const r=await fetch('https://api.github.com/gists/'+G,{cache:'no-store'});if(r.ok){const j=await r.json();t=j.files&&j.files[FILE]&&j.files[FILE].content}}catch(e){}
+ if(!t){try{const r=await fetch('https://gist.githubusercontent.com/'+OWN+'/'+G+'/raw/'+FILE+'?t='+Date.now(),{cache:'no-store'});if(r.ok)t=await r.text()}catch(e){}}
+ if(!t)return null;
+ const d=JSON.parse(t);
+ const km=await crypto.subtle.importKey('raw',te.encode(key),'PBKDF2',false,['deriveKey']);
+ const k=await crypto.subtle.deriveKey({name:'PBKDF2',salt:te.encode('lila-addr-v1'),iterations:150000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+ return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(d.iv)},k,b64(d.ct))));
+}
+const target=p=>p&&p.u&&/^https:\/\/[a-z0-9.-]+\//.test(p.u)?p.u:null;
+function probe(u){return new Promise(res=>{const i=new Image();const t=setTimeout(()=>{i.src='';res(false)},9000);
+ i.onload=()=>{clearTimeout(t);res(true)};i.onerror=()=>{clearTimeout(t);res(false)};i.src=u+'ping.gif?door='+Date.now()})}
+let timer=null,left=0,busy=false;
+function asleep(){busy=false;left=10;
+ const say=()=>show('asleep','The mirror is asleep. Jai’s Mac is off or offline. Trying again in '+left+' s.');say();
+ timer=setInterval(()=>{left--;if(left<=0){attempt(true);return}say()},1000)}
+async function attempt(fresh){
+ if(busy)return;busy=true;clearInterval(timer);
+ if(document.body.dataset.state!=='open')show('checking','Finding the mirror…');
+ try{
+  if(fresh||!last||Date.now()-lastRead>=50000){lastRead=Date.now();
+   try{const p=await read();if(p){last=p;try{localStorage.setItem(SK+'-last',JSON.stringify(p))}catch(e){}}}
+   catch(e){busy=false;show('nokey','This link is missing its secret part. Open it again from the link Jai sent you.');return}}
+  const u=target(last);
+  if(u&&await probe(u)){miss=0;if(u!==cur){cur=u;$('art').src=u}show('open');busy=false;return}
+ }catch(e){}
+ if(document.body.dataset.state==='open'&&++miss<2){busy=false;return}
+ cur='';$('art').removeAttribute('src');asleep();
+}
+$('now').onclick=()=>attempt(true);
+setInterval(()=>{if(document.body.dataset.state==='open'&&!document.hidden)attempt(false)},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.body.dataset.state!=='open')attempt(true)});
+window.addEventListener('pageshow',e=>{if(e.persisted)attempt(true)});
+window.addEventListener('online',()=>attempt(true));
+attempt(false);
+})();
+</script>
+</body></html>
