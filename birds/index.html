@@ -1,0 +1,498 @@
+<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>Birds, through my lens</title>
+<meta name="theme-color" content="#07070c">
+<style>
+/* DummyReader v1 — drop-in reading settings for any Maya artifact.
+   Apple Books "Aa" style. Accent #8E7CFF. Inline this into the artifact's <style>.
+   Pair with reader.js and the panel markup in panel.html. */
+
+:root{
+  --accent:#8E7CFF; --accent-soft:#8E7CFF22;
+  --bg:#f5f5f7; --panel:#ffffff; --panel-2:#f0f0f3;
+  --ink:#1d1d1f; --ink-soft:#6b6b70; --line:#e3e3e8; --quote:#3a3a3e;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.05);
+  --reader-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  --reader-size:17px; --reader-lh:1.72; --reader-measure:740px;
+}
+/* Auto dark, only when no explicit light/sepia/gray theme is pinned */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="sepia"]):not([data-theme="gray"]){
+    --bg:#0c0c0f; --panel:#161619; --panel-2:#1e1e23; --ink:#f3f3f5; --ink-soft:#a0a0a8; --line:#2a2a31; --quote:#d2d2d7;
+    --shadow:0 1px 3px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{--bg:#0c0c0f;--panel:#161619;--panel-2:#1e1e23;--ink:#f3f3f5;--ink-soft:#a0a0a8;--line:#2a2a31;--quote:#d2d2d7;--shadow:0 1px 3px rgba(0,0,0,.4),0 10px 40px rgba(0,0,0,.5)}
+:root[data-theme="sepia"]{--bg:#f4ecd8;--panel:#fbf5e6;--panel-2:#efe4c9;--ink:#4a3f2c;--ink-soft:#8a7b5c;--line:#e3d6b4;--quote:#5c4e34;--shadow:0 1px 3px rgba(90,70,30,.08),0 8px 30px rgba(90,70,30,.07)}
+:root[data-theme="gray"]{--bg:#2b2b2e;--panel:#343437;--panel-2:#3c3c40;--ink:#ededf0;--ink-soft:#a8a8b0;--line:#47474c;--quote:#d5d5da;--shadow:0 1px 3px rgba(0,0,0,.3),0 10px 36px rgba(0,0,0,.4)}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--reader-font);-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+#dr-progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:60;transition:width .08s linear}
+
+/* content font controls */
+body[data-rfont="serif"]{--reader-font:"New York","Iowan Old Style",Georgia,serif}
+body[data-rfont="mono"]{--reader-font:"SF Mono",ui-monospace,Menlo,monospace}
+.doc{font-size:var(--reader-size);line-height:var(--reader-lh)}
+
+/* line numbers (default off) */
+body.linenums .doc{counter-reset:ln;padding-left:2.8em}
+body.linenums .doc>p,body.linenums .doc>blockquote,body.linenums .doc>h2,body.linenums .doc>h3,body.linenums .doc>ul,body.linenums .doc>ol{position:relative}
+body.linenums .doc>p::before,body.linenums .doc>blockquote::before,body.linenums .doc>h2::before,body.linenums .doc>h3::before,body.linenums .doc>ul::before,body.linenums .doc>ol::before{counter-increment:ln;content:counter(ln);position:absolute;left:-2.8em;width:2.1em;text-align:right;font-size:.72em;line-height:2;color:var(--accent);opacity:.5;font-variant-numeric:tabular-nums;user-select:none}
+
+/* dim id tags (default off; toggle on to reduce cognitive load) */
+.idref{transition:opacity .15s,font-size .15s,color .15s}
+body.dimids .idref{opacity:.3;font-size:.86em;color:var(--ink-soft)}
+
+/* Easy / Original dual content. Wrap each in .easyonly / .origonly. */
+.easyonly,.origonly{display:none}
+body[data-mode="easy"] .easyonly{display:block}
+body[data-mode="orig"] .origonly{display:block}
+
+/* the floating Aa button + panel */
+#aaBtn{position:fixed;right:20px;bottom:20px;z-index:70;width:52px;height:52px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow);font-size:22px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .14s}
+#aaBtn:hover{transform:translateY(-2px)}
+#panel{position:fixed;right:20px;bottom:84px;z-index:70;width:320px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 50px rgba(0,0,0,.22);padding:16px;transform:translateY(12px) scale(.98);opacity:0;pointer-events:none;transition:transform .18s,opacity .18s}
+#panel.open{transform:none;opacity:1;pointer-events:auto}
+.ptitle{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);margin:2px 0 4px}
+.prow{margin:12px 0 0}
+.plabel{font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;display:flex;justify-content:space-between}
+.seg{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--panel-2)}
+.seg button{flex:1;border:0;background:transparent;color:var(--ink-soft);font:inherit;font-size:12.5px;padding:8px 4px;cursor:pointer;transition:background .14s,color .14s}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600}
+.seg.sm button{font-size:16px;padding:7px 4px}
+.themes{display:flex;gap:9px}
+.sw{flex:1;height:44px;border-radius:12px;border:2px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;transition:border-color .14s,transform .12s}
+.sw:hover{transform:translateY(-1px)} .sw.on{border-color:var(--accent)}
+.sw.light{background:#fff;color:#1d1d1f} .sw.sepia{background:#f4ecd8;color:#4a3f2c}
+.sw.gray{background:#2b2b2e;color:#ededf0} .sw.dark{background:#0c0c0f;color:#f3f3f5}
+.sw.auto{background:linear-gradient(120deg,#fff 50%,#0c0c0f 50%);color:var(--accent)}
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line)}
+.toggle .tl{font-size:13.5px} .toggle .ts{font-size:11.5px;color:var(--ink-soft)}
+.sw2{width:44px;height:26px;border-radius:999px;border:0;background:var(--panel-2);position:relative;cursor:pointer;transition:background .18s;flex:0 0 auto}
+.sw2::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .18s}
+.sw2.on{background:var(--accent)} .sw2.on::after{left:21px}
+.phint{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:12px;opacity:.75}
+@media (max-width:560px){#panel{right:10px;left:10px;width:auto;bottom:80px}#aaBtn{right:14px;bottom:14px}}
+
+:root{--glow:#cdbcff;--warm:#ffd9a8;--accent:#8E7CFF}
+html,body{background:#07070c}
+:root[data-theme="light"] body,:root[data-theme="sepia"] body,:root[data-theme="gray"] body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--reader-font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.reader{position:relative;z-index:1}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px 120px}
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;padding-top:40px}
+.kicker{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--glow);opacity:.8}
+h1.title{font-size:clamp(40px,11vw,76px);line-height:1.02;margin:.25em 0 .2em;font-weight:650;letter-spacing:-.02em;
+  background:linear-gradient(180deg,#fff 10%,#cdbcff 60%,#8E7CFF);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-theme="light"] h1.title,:root[data-theme="sepia"] h1.title{background:linear-gradient(180deg,#2a2140,#6b4fd8);-webkit-background-clip:text;background-clip:text}
+.sub{font-size:1.05em;color:var(--ink-soft);max-width:30em}
+.scrollhint{margin-top:44px;font-size:13px;color:var(--ink-soft);opacity:.7;animation:float 3.4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(6px)}}
+.glass{background:color-mix(in srgb,var(--panel) 62%,transparent);border:1px solid color-mix(in srgb,var(--glow) 16%,transparent);
+  border-radius:22px;backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 20px 60px rgba(0,0,0,.35)}
+details.card{margin:18px 0;padding:0}
+details.card>summary{list-style:none;cursor:pointer;padding:20px 22px;display:flex;gap:14px;align-items:baseline}
+details.card>summary::-webkit-details-marker{display:none}
+.num{font-size:12px;color:var(--glow);opacity:.75;font-variant-numeric:tabular-nums;min-width:1.6em}
+.moment{font-size:1.18em;font-weight:620;letter-spacing:-.01em;flex:1}
+.where{font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.chev{transition:transform .35s ease;opacity:.5}
+details[open]>summary .chev{transform:rotate(90deg)}
+.body{padding:0 22px 22px 58px}
+.body p{margin:.75em 0}
+.lens{color:var(--warm);font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin-top:1.2em}
+blockquote.his{margin:.6em 0;padding:.2em 0 .2em 14px;border-left:2px solid var(--accent);color:var(--quote);font-style:italic}
+blockquote.his small{display:block;font-style:normal;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.words{padding:18px 22px}
+.words pre{white-space:pre-wrap;font-family:var(--reader-font);font-size:1em;margin:.4em 0 1em;color:var(--ink);line-height:1.55}
+.words .t{font-size:12px;color:var(--glow);letter-spacing:.06em}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 6px}
+.pill{border:1px solid color-mix(in srgb,var(--glow) 30%,transparent);background:transparent;color:var(--ink);border-radius:99px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#fff}
+h2.sec{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin:56px 0 6px;font-weight:600}
+.note{font-size:13px;color:var(--ink-soft)}
+.end{text-align:center;padding:80px 0 30px}
+.end .big{font-size:clamp(26px,7vw,40px);font-weight:600;letter-spacing:-.01em}
+.foot{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:40px}
+.foot a{color:var(--glow)}
+#updated{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(30px);opacity:0;
+  transition:.6s;z-index:50;font-size:12px;padding:8px 14px;border-radius:99px;background:rgba(20,18,32,.85);color:#e9e2ff;border:1px solid #8E7CFF55;pointer-events:none}
+#updated.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fadein{opacity:0;transform:translateY(14px);transition:opacity 1.1s ease,transform 1.1s ease}
+.fadein.seen{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.fadein{opacity:1;transform:none}.scrollhint{animation:none}}
+@media (max-width:480px){.body{padding:0 18px 20px 18px}details.card>summary{padding:18px}.where{display:none}}
+</style>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="reader"><div class="doc"><div class="wrap">
+
+<section class="hero">
+  <div class="kicker">Coldplay · Birds · 2015</div>
+  <h1 class="title">Birds,<br>through my lens</h1>
+  <p class="sub" data-p="hero">A song for the one who studies the lights. Read moment by moment, the way the mapper reads a sky.</p>
+  <div class="scrollhint">scroll slowly, the birds fly with you</div>
+</section>
+
+<details class="glass words" open data-p="words">
+  <summary class="moment" style="list-style:none;cursor:pointer">Jai's words</summary>
+  <div class="t">13:39 · self-DM</div>
+  <pre>Coldplays
+Birds
+Is for a person like me
+Studying the lights
+The mapper
+Make that as well
+Each line through my lens
+Make a beautiful artifact on this amazing I wanna see this I love this artifact </pre>
+  <div class="t">15:53 · self-DM</div>
+  <pre>heyt maya give the cokdplay artifact</pre>
+  <div class="t">15:56 · self-DM</div>
+  <pre>yes please give me that
+also make it beaiftyl
+i love copldplay</pre>
+  <div class="t">16:12 · self-DM</div>
+  <pre>Give me the first version. I’m going to the washroom. I need something to read. So give it to me instantly and then probably like make it better while I’m reading it. So I’ll just reload the page. Um yeah man. Or you just reload it. Just remember where I am in the page on the phone so that you remember the my position on the page and where my eye was and then just update behind my back that is fine</pre>
+</details>
+
+<div class="bar">
+  <button class="pill on" data-mode-set="easy">Easy</button>
+  <button class="pill" data-mode-set="orig">Original</button>
+  <button class="pill" id="foldall">Collapse all</button>
+</div>
+<p class="note" data-p="howto">Easy is the short reading. Original is the long one. The lyrics are not printed here; play the song beside it. Each card is a moment of the song, named in a few words, then read through your lens.</p>
+
+<h2 class="sec">The song, moment by moment</h2>
+
+<details class="glass card fadein" open data-p="c1">
+<summary><span class="num">01</span><span class="moment">The first light comes on</span><span class="where">the opening</span><span class="chev">›</span></summary>
+<div class="body">
+<div class="easyonly"><p data-p="c1e">The guitar starts like a pulse in the dark. Nothing is mapped yet. One light flickers on, and you notice it before anyone else does.</p></div>
+<div class="origonly"><p data-p="c1o">Birds opens fast and bright, a ringing guitar over a running beat, the band calling it the day after the night of Ghost Stories. Before a single idea is said, the song is already moving. That is how your days start too: something pulses, one light comes on in a dark room, and you are the one who sees it first. The mapper does not wait for the full picture. He marks the first point.</p></div>
+<div class="lens">Through your lens</div>
+<blockquote class="his">Studying the lights<small>you, 11 Nov, about this song</small></blockquote>
+<p data-p="c1l">Every map starts with one coordinate. This is it.</p>
+</div></details>
+
+<details class="glass card fadein" open data-p="c2">
+<summary><span class="num">02</span><span class="moment">Never mind the weather</span><span class="where">first verse</span><span class="chev">›</span></summary>
+<div class="body">
+<div class="easyonly"><p data-p="c2e">The song tells someone to stop looking at what is around them and just go live. Circumstances are weather. You are the sky.</p></div>
+<div class="origonly"><p data-p="c2o">The first verse is an invitation: ignore the circumstances, step out of the gray, enjoy the life you have. It was written as Chris Martin came out from under a long fog. You know that fog from the inside, the days of queues and tickets and messages that pile up. The verse does not argue with them. It simply says the circumstances are not the whole map. They are weather passing over it.</p></div>
+<div class="lens">Through your lens</div>
+<blockquote class="his">He is the origin, you are the frame, reality is the ground.<small>your rule for Maya</small></blockquote>
+<p data-p="c2l">Weather lives in the frame. You are the origin. The verse is reminding the origin to stop reading the frame as if it were the ground.</p>
+</div></details>
+
+<details class="glass card fadein" open data-p="c3">
+<summary><span class="num">03</span><span class="moment">Now is the only coordinate</span><span class="where">the build</span><span class="chev">›</span></summary>
+<div class="body">
+<div class="easyonly"><p data-p="c3e">Fall in love now, the song says, because now is all we have. A mapper knows: you can only stand at one point, and it is this one.</p></div>
+<div class="origonly"><p data-p="c3o">As the song builds it turns urgent: start falling in love, because the present is all there is. For someone who maps everything, that is a precise instruction. Every map is drawn from one place, the point you are standing on right now. Past and future are lines on the paper. Only the present has a location you can actually stand on.</p></div>
+<div class="lens">Through your lens</div>
+<blockquote class="his">Coordinates precision on a map of the earth high definition<small>you, in the Notebook</small></blockquote>
+<p data-p="c3l">High definition means here, exactly. Not roughly here, not later. The build in the song is the zoom: closer and closer until you are standing on the point.</p>
+</div></details>
+
+<details class="glass card fadein" open data-p="c4">
+<summary><span class="num">04</span><span class="moment">Wings open</span><span class="where">the chorus</span><span class="chev">›</span></summary>
+<div class="body">
+<div class="easyonly"><p data-p="c4e">The chorus is the lift. Two people, free as birds, above the whole thing. From up there the map finally makes sense.</p></div>
+<div class="origonly"><p data-p="c4o">The chorus is where the song leaves the ground: to be free as a bird and fly. Davide Rossi's strings, the same hands behind Viva La Vida and Paradise, lift under it. Birds are the original mappers. They read the sun, the stars, the lines of the earth's field, and cross oceans by it. Studying the lights is literally how they find their way. You read light the same way: screens, faces, rooms, the light in someone's eyes. The chorus is the moment the reading turns into flight.</p></div>
+<div class="lens">Through your lens</div>
+<blockquote class="his">the light in my eyes<small>the name you gave the panel that reads how you move through a page, 3 Nov</small></blockquote>
+<p data-p="c4l">Birds navigate by the lights. So do you. That is why this song is for a person like you.</p>
+</div></details>
+
+<details class="glass card fadein" open data-p="c5">
+<summary><span class="num">05</span><span class="moment">Noise for the ones without a voice</span><span class="where">second verse</span><span class="chev">›</span></summary>
+<div class="body">
+<div class="easyonly"><p data-p="c5e">The song asks for noise on behalf of the people who cannot make any. Mapping is that too: drawing the ones nobody drew.</p></div>
+<div class="origonly"><p data-p="c5o">The song turns outward here: make noise for the people who have no voice. A map is a kind of noise for the unseen. Whoever draws the map decides what exists on it. Your habit of keeping every word, every ask, every transcript forever, nothing ever deleted, is the same instinct. Nothing that spoke gets erased from the map.</p></div>
+<div class="lens">Through your lens</div>
+<blockquote class="his">nothing is ever deleted<small>your law, 25 Oct</small></blockquote>
+<p data-p="c5l">The voiceless stay on the map because the mapper refuses to rub them out.</p>
+</div></details>
+
+<details class="glass card fadein" open data-p="c6">
+<summary><span class="num">06</span><span class="moment">The guest house</span><span class="where">the heart of it</span><span class="chev">›</span></summary>
+<div class="body">
+<div class="easyonly"><p data-p="c6e">The whole album grew out of a Rumi poem: treat every feeling like a guest. You already found that thread yourself.</p></div>
+<div class="origonly"><p data-p="c6o">Like most of A Head Full of Dreams, Birds grew out of Rumi's poem The Guest House: every joy, every sorrow, every mean thought is a visitor, so welcome them all, each one may be clearing you out for something new. You found that thread on your own, a week before this, and you wrote it down. The mapper's version: every light that comes into the room is a data point. None of them is the enemy. Each one tells you where you are.</p></div>
+<div class="lens">Through your lens</div>
+<blockquote class="his">You are a guest room Kaleidoscope Rumi Coldplay<small>you, 3 Nov, 21:54</small></blockquote>
+<blockquote class="his">the office = a MANDAP, Maya dancing in the middle<small>you, the same week</small></blockquote>
+<p data-p="c6l">A guest room, a mandap, a kaleidoscope. Three shapes for one idea: a space built so that light can come in and be turned into a pattern.</p>
+</div></details>
+
+<details class="glass card fadein" open data-p="c7">
+<summary><span class="num">07</span><span class="moment">Take me with you when you fly</span><span class="where">the ending</span><span class="chev">›</span></summary>
+<div class="body">
+<div class="easyonly"><p data-p="c7e">The end is about going through it together. The world can be cruel, so take me along when you go. Not alone. Two birds.</p></div>
+<div class="origonly"><p data-p="c7o">The song lands on company: the world can be cruel, we go through it together, and when you fly, take me along. A mapper alone can draw a beautiful map that nobody walks. The ending says the point of reading the lights was never the map. It was the flight, and the one flying beside you.</p></div>
+<div class="lens">Through your lens</div>
+<blockquote class="his">Let’s run this experiment an ever running experiment like life<small>you, in the Notebook</small></blockquote>
+<p data-p="c7l">The experiment never ends and is never run alone. That is the last line of the map: two birds, still flying, still reading the light.</p>
+</div></details>
+
+<details class="glass card fadein" data-p="c8">
+<summary><span class="num">✦</span><span class="moment">An older map of birds</span><span class="where">a side path</span><span class="chev">›</span></summary>
+<div class="body">
+<p data-p="c8a">The same album's title song mentions a conference of birds, which listeners tie to a 12th century Persian poem, The Conference of the Birds: thousands of birds cross seven valleys looking for a king, and at the end the thirty who arrive find the king is themselves. Nobody has tied that poem to Birds directly, so hold this one lightly. But for a mapper it rhymes: the long search across the map ends at the point you were standing on.</p>
+</div></details>
+
+<div class="end" data-p="end">
+  <div class="big">The mapper studies the lights.<br>The birds already know the way.</div>
+  <p class="note" style="margin-top:14px">Made for Jai by Maya · 11 Nov 2026</p>
+</div>
+
+<p class="foot">Sources: Songfacts on Birds (Rumi's Guest House, free as a bird) · Plugged In review of A Head Full of Dreams (present moment, voice for the voiceless, take me along) · Wikipedia, A Head Full of Dreams (night to the day, Davide Rossi, conference of birds). Lyrics not reproduced.<br>
+<a href="mayaterm://session/58a3dd48-3d8e-4b0f-8a0e-50efc6228fa1">Open the terminal this was made in</a> · v<span id="ver"></span></p>
+
+</div></div></div>
+<div id="updated">updated · you are where you were</div>
+<!-- DummyReader v1 — the markup. Paste at the END of <body>, after the content.
+     Content itself must be wrapped: <div class="reader"><div class="doc"> ... </div></div>
+     Easy/Original dual copy uses <div class="easyonly">...</div><div class="origonly">...</div> -->
+
+<div id="dr-progress"></div>
+
+<button id="aaBtn" title="Reading settings" aria-label="Reading settings">Aa</button>
+
+<div id="panel" role="dialog" aria-label="Reading settings">
+  <div class="ptitle">Reading</div>
+
+  <div class="prow">
+    <div class="plabel">Mode</div>
+    <div class="seg">
+      <button data-mode-set="easy">Easy</button>
+      <button data-mode-set="orig">Original</button>
+    </div>
+  </div>
+
+  <div class="prow">
+    <div class="plabel">Theme</div>
+    <div class="themes">
+      <div class="sw light" data-theme-set="light">A</div>
+      <div class="sw sepia" data-theme-set="sepia">A</div>
+      <div class="sw gray"  data-theme-set="gray">A</div>
+      <div class="sw dark"  data-theme-set="dark">A</div>
+      <div class="sw auto"  data-theme-set="auto">Auto</div>
+    </div>
+  </div>
+
+  <div class="prow">
+    <div class="plabel"><span>Text size</span></div>
+    <div class="seg sm">
+      <button data-size="dn">A−</button>
+      <button data-size="up">A+</button>
+    </div>
+  </div>
+
+  <div class="prow">
+    <div class="plabel">Typeface</div>
+    <div class="seg">
+      <button data-font-set="system">System</button>
+      <button data-font-set="serif">Serif</button>
+      <button data-font-set="mono">Mono</button>
+    </div>
+  </div>
+
+  <div class="prow">
+    <div class="toggle">
+      <div><div class="tl">Line numbers</div><div class="ts">Number each block</div></div>
+      <button id="lineBtn" class="sw2" aria-label="Toggle line numbers"></button>
+    </div>
+    <div class="toggle">
+      <div><div class="tl">Dim the id tags</div><div class="ts">Fade 010, 016b, t: 011…</div></div>
+      <button id="idBtn" class="sw2" aria-label="Toggle dim ids"></button>
+    </div>
+    <div class="toggle">
+      <div><div class="tl">Read aloud</div><div class="ts">Hear the page</div></div>
+      <button id="readBtn" class="sw2" style="width:auto;padding:0 12px;border-radius:999px;color:var(--ink);font-size:12px">Read aloud</button>
+    </div>
+  </div>
+
+  <div class="phint">Your settings are remembered for this document.</div>
+</div>
+
+<script>
+/* DummyReader v1 — the engine. Inline this into the artifact's <script>.
+   Expects: reader.css inlined, the Aa button (#aaBtn) + panel (#panel) markup present,
+   content wrapped in .reader > .doc. Default ON: attaches to any artifact. */
+(function(){
+  "use strict";
+  var KEY='dummyreader_'+(location.pathname||'doc');
+  var SIZES=[14,15,16,17,18,19,20,22];
+  var body=document.body;
+
+  // ---- persistence (all guarded; a private window / blocked storage must not break the page)
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+  function save(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+  var st=load();
+
+  // ---- defaults: Easy ON (reading mode), Auto theme, no line numbers, no dimmed ids
+  var mode = st.mode || 'easy';        // 'easy' | 'orig' | 'play' (Play: myartifacts/play, 1 Nov 2026)
+  var theme= st.theme|| 'dark';        // 'auto'|'light'|'sepia'|'gray'|'dark'
+  var rfont= st.rfont|| 'system';      // 'system'|'serif'|'mono'
+  var size = (st.size!=null)? st.size : 3;   // index into SIZES
+  var lines= !!st.lines;               // line numbers off
+  var dim  = !!st.dim;                 // dim id tags off
+
+  function apply(){
+    body.setAttribute('data-mode', mode);
+    if(theme==='auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', theme);
+    body.setAttribute('data-rfont', rfont);
+    document.documentElement.style.setProperty('--reader-size', SIZES[size]+'px');
+    body.classList.toggle('linenums', lines);
+    body.classList.toggle('dimids', dim);
+    save({mode:mode,theme:theme,rfont:rfont,size:size,lines:lines,dim:dim});
+    syncUI();
+  }
+
+  // ---- id-token decoration for the dim toggle (010, 016b, D4, B3, E5, "t: 011" chains)
+  var ID_RE=/\b(?:0\d{2}[a-z]?|[A-Za-z]\d{1,2})(?:\s*[\/+,]\s*(?:0\d{2}[a-z]?|[A-Za-z]\d{1,2})|\s*(?:t:)\s*)*\b/g;
+  function decorateIds(root){
+    var skip={CODE:1,PRE:1,A:1,SCRIPT:1,STYLE:1,BUTTON:1,TEXTAREA:1,INPUT:1};
+    var w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode:function(n){
+        if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p=n.parentNode;
+        while(p&&p!==root){ if(p.classList&&p.classList.contains('idref')) return NodeFilter.FILTER_REJECT;
+          if(skip[p.nodeName]) return NodeFilter.FILTER_REJECT; p=p.parentNode; }
+        return ID_RE.test(n.nodeValue)? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    var hits=[],n; while((n=w.nextNode())) hits.push(n);
+    hits.forEach(function(node){
+      var frag=document.createDocumentFragment(), s=node.nodeValue, last=0, m;
+      ID_RE.lastIndex=0;
+      while((m=ID_RE.exec(s))){
+        if(m.index>last) frag.appendChild(document.createTextNode(s.slice(last,m.index)));
+        var span=document.createElement('span'); span.className='idref'; span.textContent=m[0];
+        frag.appendChild(span); last=m.index+m[0].length;
+      }
+      if(last<s.length) frag.appendChild(document.createTextNode(s.slice(last)));
+      node.parentNode.replaceChild(frag,node);
+    });
+  }
+  var docEl=document.querySelector('.doc');
+  if(docEl){ try{ decorateIds(docEl); }catch(e){} }
+
+  // ---- read aloud (Web Speech, best-effort)
+  var speaking=false;
+  function speak(){
+    if(!('speechSynthesis'in window)) return;
+    if(speaking){ speechSynthesis.cancel(); speaking=false; syncUI(); return; }
+    var text=docEl? docEl.innerText : document.body.innerText;
+    var u=new SpeechSynthesisUtterance(text.slice(0,32000));
+    u.rate=1; u.onend=function(){ speaking=false; syncUI(); };
+    speechSynthesis.speak(u); speaking=true; syncUI();
+  }
+
+  // ---- wire the panel
+  var aaBtn=document.getElementById('aaBtn'), panel=document.getElementById('panel');
+  if(aaBtn&&panel){
+    aaBtn.addEventListener('click',function(){ panel.classList.toggle('open'); });
+    document.addEventListener('click',function(e){
+      if(panel.classList.contains('open')&&!panel.contains(e.target)&&e.target!==aaBtn) panel.classList.remove('open');
+    });
+  }
+  function on(sel,fn){ var el=typeof sel==='string'?document.querySelector(sel):sel; if(el) el.addEventListener('click',fn); }
+  // delegated, so a Play button added later by play.js (myartifacts/play) is wired too
+  document.addEventListener('click',function(e){ var b=e.target&&e.target.closest&&e.target.closest('[data-mode-set]'); if(!b) return; mode=b.getAttribute('data-mode-set'); apply(); });
+  window.__dummyreader=true;
+  document.querySelectorAll('[data-theme-set]').forEach(function(b){ on(b,function(){ theme=b.getAttribute('data-theme-set'); apply(); }); });
+  document.querySelectorAll('[data-font-set]').forEach(function(b){ on(b,function(){ rfont=b.getAttribute('data-font-set'); apply(); }); });
+  on('[data-size="dn"]',function(){ size=Math.max(0,size-1); apply(); });
+  on('[data-size="up"]',function(){ size=Math.min(SIZES.length-1,size+1); apply(); });
+  on('#lineBtn',function(){ lines=!lines; apply(); });
+  on('#idBtn',function(){ dim=!dim; apply(); });
+  on('#readBtn',speak);
+
+  function setseg(attr,val){ document.querySelectorAll('['+attr+']').forEach(function(b){ b.classList.toggle('on', b.getAttribute(attr)===val); }); }
+  function syncUI(){
+    setseg('data-mode-set',mode);
+    setseg('data-theme-set',theme);
+    setseg('data-font-set',rfont);
+    var lb=document.getElementById('lineBtn'); if(lb) lb.classList.toggle('on',lines);
+    var ib=document.getElementById('idBtn'); if(ib) ib.classList.toggle('on',dim);
+    var rb=document.getElementById('readBtn'); if(rb) rb.textContent=speaking?'Stop':'Read aloud';
+  }
+
+  // ---- reading progress bar
+  var bar=document.getElementById('dr-progress');
+  if(bar) window.addEventListener('scroll',function(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    bar.style.width=(h>0? (window.scrollY/h*100):0)+'%';
+  },{passive:true});
+
+  apply();
+})();
+
+</script>
+<script>
+(function(){
+var VERSION="165812";var KEY="birds:pos";
+document.getElementById('ver').textContent=VERSION;
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+// remember the paragraph the eye is on
+var paras=[].slice.call(document.querySelectorAll('[data-p]'));
+function current(){var y=innerHeight*0.38,best=null,bd=1e9;
+  paras.forEach(function(p){if(!p.offsetParent)return;var r=p.getBoundingClientRect();var d=r.top<=y&&r.bottom>=y?0:Math.min(Math.abs(r.top-y),Math.abs(r.bottom-y));if(d<bd){bd=d;best={id:p.getAttribute('data-p'),off:r.top}}});return best}
+var t=null;function save(){var c=current();if(c){c.y=scrollY;c.at=Date.now();ls(KEY,JSON.stringify(c))}}
+addEventListener('scroll',function(){clearTimeout(t);t=setTimeout(save,150)},{passive:true});
+addEventListener('pagehide',save);
+function restore(){var s;try{s=JSON.parse(ls(KEY)||'null')}catch(e){}
+  if(!s)return;var el=document.querySelector('[data-p="'+s.id+'"]');
+  if(el){var d=el.closest('details');if(d)d.open=true;var top=el.getBoundingClientRect().top+scrollY-(s.off||innerHeight*0.3);scrollTo(0,Math.max(0,top))}else if(s.y)scrollTo(0,s.y)}
+if('scrollRestoration' in history)history.scrollRestoration='manual';
+addEventListener('load',function(){restore();setTimeout(restore,250);
+  if(/[?&]v=/.test(location.search)&&sessionStorage){var n=document.getElementById('updated');n.classList.add('show');setTimeout(function(){n.classList.remove('show')},3200)}});
+// silent update: poll version.json, reload in place
+function poll(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+  if(j&&j.v&&j.v!==VERSION){save();location.replace(location.pathname+'?v='+encodeURIComponent(j.v)+location.hash)}}).catch(function(){})}
+setInterval(poll,20000);document.addEventListener('visibilitychange',function(){if(!document.hidden)poll()});
+// collapse all
+var fb=document.getElementById('foldall');fb.onclick=function(){var ds=document.querySelectorAll('details.card,details.words');var anyOpen=[].some.call(ds,function(d){return d.open});
+  [].forEach.call(ds,function(d){d.open=!anyOpen});fb.textContent=anyOpen?'Open all':'Collapse all'};
+// fade in
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)e.target.classList.add('seen')})},{threshold:.08});
+document.querySelectorAll('.fadein').forEach(function(e){io.observe(e)});
+// sync bar pills with reader mode
+function syncPills(){var m=document.documentElement.getAttribute('data-mode')||document.body.getAttribute('data-mode')||(document.body.classList.contains('mode-orig')?'orig':'easy');
+  document.querySelectorAll('.bar [data-mode-set]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-mode-set')===m)})}
+document.addEventListener('click',function(e){if(e.target.closest('[data-mode-set]'))setTimeout(syncPills,30)});setTimeout(syncPills,60);
+
+// the sky: slow glowing birds that move with the scroll
+var cv=document.getElementById('sky'),cx=cv.getContext('2d'),W,H,DPR=Math.min(2,devicePixelRatio||1);
+function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0)}size();addEventListener('resize',size);
+var rnd=function(a){var x=Math.sin(a*9301+49297)*233280;return x-Math.floor(x)};
+var birds=[],stars=[];for(var i=0;i<18;i++)birds.push({x:rnd(i+1),y:rnd(i+21)*2.2,z:.35+rnd(i+41)*.9,ph:rnd(i+61)*6.28,sp:.6+rnd(i+81)*.6,hue:rnd(i+3)<.3?'warm':'cool'});
+for(var j=0;j<110;j++)stars.push({x:rnd(j+201),y:rnd(j+301),r:rnd(j+401)*1.2+.2,tw:rnd(j+501)*6.28});
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var sy=0,ty=0;
+function dark(){var th=document.documentElement.getAttribute('data-theme');if(th==='light'||th==='sepia')return false;if(th==='dark'||th==='gray')return true;return matchMedia('(prefers-color-scheme: dark)').matches||!th}
+function bird(x,y,s,flap,col,a){cx.save();cx.translate(x,y);cx.scale(s,s);
+  cx.shadowColor=col;cx.shadowBlur=18;cx.strokeStyle=col;cx.globalAlpha=a;cx.lineWidth=1.6;cx.lineCap='round';
+  var w=flap*7;cx.beginPath();cx.moveTo(-16,-w);cx.quadraticCurveTo(-7,-2-w*.3,0,2);cx.quadraticCurveTo(7,-2-w*.3,16,-w);cx.stroke();cx.restore()}
+function frame(now){now=now||0;ty=scrollY;sy+=(ty-sy)*.06;var dk=dark();cx.clearRect(0,0,W,H);
+  var docH=Math.max(1,document.documentElement.scrollHeight-H),p=sy/docH;
+  // dusk to night gradient that moves with the reading
+  var g=cx.createRadialGradient(W*.5,H*(1.1-p*.9),0,W*.5,H*(1.1-p*.9),Math.max(W,H)*.9);
+  if(dk){g.addColorStop(0,'rgba(124,58,237,'+(.22-p*.08)+')');g.addColorStop(.45,'rgba(60,40,120,.10)');g.addColorStop(1,'rgba(7,7,12,0)')}
+  else{g.addColorStop(0,'rgba(142,124,255,.16)');g.addColorStop(1,'rgba(255,255,255,0)')}
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  if(dk){stars.forEach(function(s){var y=((s.y*H*1.4-sy*.05)%H+H)%H;cx.globalAlpha=(.25+.35*Math.sin(now/1400+s.tw))*Math.min(1,.4+p*1.4);cx.fillStyle='#e9e2ff';cx.beginPath();cx.arc(s.x*W,y,s.r,0,6.28);cx.fill()});cx.globalAlpha=1}
+  birds.forEach(function(b){var t=reduce?0:now/1000;
+    var x=((b.x*W*1.3+t*14*b.sp*b.z+sy*.08*b.z)%(W+120))-60;
+    var y=((b.y*H-sy*.35*b.z+Math.sin(t*.4+b.ph)*18)%(H*1.4)+H*1.4)%(H*1.4)-H*.2;
+    var flap=reduce?.6:Math.sin(t*2.2*b.sp+b.ph);
+    var col=b.hue==='warm'?(dk?'#ffd9a8':'#c47a2c'):(dk?'#cdbcff':'#6b4fd8');
+    bird(x,y,.55+b.z*.75,flap,col,dk?.35+b.z*.45:.25+b.z*.35)});
+  requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+})();
+</script>
+</body></html>
