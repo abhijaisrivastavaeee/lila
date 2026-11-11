@@ -434,13 +434,13 @@ i love copldplay</pre>
 </script>
 <script>
 (function(){
-var VERSION="165910";var KEY="birds:pos";
+var VERSION="165945";var KEY="birds:pos";
 document.getElementById('ver').textContent=VERSION;
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 // remember the paragraph the eye is on
 var paras=[].slice.call(document.querySelectorAll('[data-p]'));
 function current(){var y=innerHeight*0.38,best=null,bd=1e9;
-  paras.forEach(function(p){if(!p.offsetParent)return;var r=p.getBoundingClientRect();var d=r.top<=y&&r.bottom>=y?0:Math.min(Math.abs(r.top-y),Math.abs(r.bottom-y));if(d<bd){bd=d;best={id:p.getAttribute('data-p'),off:r.top}}});return best}
+  paras.forEach(function(p){if(!p.offsetParent)return;var r=p.getBoundingClientRect();var d=r.top<=y&&r.bottom>=y?0:Math.min(Math.abs(r.top-y),Math.abs(r.bottom-y));if(d<=bd){bd=d;best={id:p.getAttribute('data-p'),off:r.top}}});return best}
 var t=null;function save(){var c=current();if(c){c.y=scrollY;c.at=Date.now();ls(KEY,JSON.stringify(c))}}
 addEventListener('scroll',function(){clearTimeout(t);t=setTimeout(save,150)},{passive:true});
 addEventListener('pagehide',save);
