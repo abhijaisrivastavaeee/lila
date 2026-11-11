@@ -118,7 +118,7 @@ h2.sec{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--i
 #updated{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(30px);opacity:0;
   transition:.6s;z-index:50;font-size:12px;padding:8px 14px;border-radius:99px;background:rgba(20,18,32,.85);color:#e9e2ff;border:1px solid #8E7CFF55;pointer-events:none}
 #updated.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.fadein{opacity:0;transform:translateY(14px);transition:opacity 1.1s ease,transform 1.1s ease}
+.fadein{opacity:.35;transform:translateY(10px);transition:opacity 1.1s ease,transform 1.1s ease}
 .fadein.seen{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.fadein{opacity:1;transform:none}.scrollhint{animation:none}}
 @media (max-width:480px){.body{padding:0 18px 20px 18px}details.card>summary{padding:18px}.where{display:none}}
@@ -434,7 +434,7 @@ i love copldplay</pre>
 </script>
 <script>
 (function(){
-var VERSION="165945";var KEY="birds:pos";
+var VERSION="165954";var KEY="birds:pos";
 document.getElementById('ver').textContent=VERSION;
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 // remember the paragraph the eye is on
