@@ -41,7 +41,7 @@ async function attempt(){
       catch(e){show('nokey','This link is missing its secret part. Open it again from the message Maya sent you.');busy=false;return}
     }
     const u=target(last);
-    if(u&&await probe(u)){show('going','Opening '+C.title+'…');location.replace(u);return}
+    if(u&&await probe(u)){show('going','Opening '+C.title+'…');location.replace(u+(C.suffix||""));return}
   }catch(e){}
   busy=false;left=10;
   show('asleep',C.title+' is asleep. The Mac is off or offline. Trying again in '+left+' s.');
