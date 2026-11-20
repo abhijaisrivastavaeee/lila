@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E0B14">
+<title>The Way Up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Mukta:wght@300;400;600&family=Tiro+Devanagari+Hindi&family=Great+Vibes&display=swap">
+<style>
+:root{
+  --bg:#0E0B14; --ink:#F1ECF6; --muted:#A79EB6; --line:#2A2436; --panel:#171222;
+  --maya:#B79CFF; --soft:#241B38;
+  --f-display:"Cormorant Garamond","Iowan Old Style",Georgia,serif;
+  --f-body:"Mukta","Avenir Next",system-ui,sans-serif;
+  --f-deva:"Tiro Devanagari Hindi","Cormorant Garamond",serif;
+  --f-script:"Great Vibes","Snell Roundhand",cursive;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#FBF7F1; --ink:#201B28; --muted:#6B6278; --line:#E7E0EC; --panel:#FFFFFF;
+  --maya:#7C3AED; --soft:#EFE7FD; color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+html{scroll-behavior:smooth}
+body{margin:0;font:300 18px/1.7 var(--f-body);-webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:62ch;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+a{color:var(--maya)}
+button{font-family:inherit}
+.toggles{position:fixed;top:env(safe-area-inset-top,0px);right:0;z-index:30;padding:12px 14px}
+.tb{font:600 13px var(--f-body);border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 70%,transparent);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+.tb:hover{border-color:var(--maya);color:var(--maya)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--maya);outline-offset:2px}
+
+.stage{position:relative;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:48px 22px;overflow:hidden;background:radial-gradient(130% 90% at 50% 8%, color-mix(in srgb,var(--maya) 20%,transparent), transparent 62%)}
+.orb{position:absolute;top:46%;left:50%;width:min(72vw,420px);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 42%, color-mix(in srgb,var(--maya) 70%,#fff) 0%, color-mix(in srgb,var(--maya) 46%,transparent) 36%, transparent 70%);
+  filter:blur(3px);opacity:.9;animation:breathe 11s ease-in-out infinite}
+.orb.bloom{animation:breathe 11s ease-in-out infinite, bloom 2.6s ease-out forwards}
+@keyframes breathe{0%,100%{transform:translate(-50%,-50%) scale(.82)}50%{transform:translate(-50%,-50%) scale(1.14)}}
+@keyframes bloom{to{opacity:1;filter:blur(0);box-shadow:0 0 120px 44px color-mix(in srgb,var(--maya) 42%,transparent)}}
+.intro{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:26ch}
+.kick{font:600 11.5px var(--f-body);letter-spacing:.24em;text-transform:uppercase;color:var(--maya)}
+.title{font:500 clamp(52px,14vw,104px)/.92 var(--f-display);margin:0;letter-spacing:-.01em}
+.title em{font-style:italic;color:var(--maya)}
+.lede{font:400 clamp(19px,4.6vw,24px)/1.42 var(--f-display);color:var(--ink);max-width:24ch;text-wrap:balance}
+.isub{color:var(--muted);font-size:14.5px;max-width:30ch;line-height:1.55}
+.run{position:relative;z-index:1;max-width:22ch;min-height:8em;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.lineT{font:500 clamp(30px,7.6vw,52px)/1.14 var(--f-display);letter-spacing:-.01em;color:var(--ink);text-wrap:balance;opacity:0;transform:translateY(12px);transition:opacity 1s ease,transform 1s ease}
+.lineS{font:400 clamp(16px,3.8vw,21px)/1.5 var(--f-body);color:var(--muted);text-wrap:balance;opacity:0;transform:translateY(10px);transition:opacity 1s ease .14s,transform 1s ease .14s}
+.lineT.show,.lineS.show{opacity:1;transform:none}
+.b{font:600 16px/1 var(--f-body);border-radius:999px;padding:14px 28px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:48px}
+.b.go{background:var(--maya);color:#140d22;border-color:var(--maya)}
+:root[data-theme="light"] .b.go{color:#fff}
+.tap{position:absolute;inset:0;z-index:2;cursor:pointer;background:transparent}
+.ctrl{position:relative;z-index:3;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.ctrl .b{padding:10px 18px;font-size:14px;min-height:40px}
+.dots{position:relative;z-index:3;display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap;max-width:20ch}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .3s,transform .3s}
+.dots i.on{background:var(--maya);transform:scale(1.4)}
+.hint{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:3;font-size:12px;color:var(--muted);opacity:.7;pointer-events:none}
+.scrollcue{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:3;color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.6;animation:nudge 2s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(5px)}}
+
+.band{padding-block:58px;border-top:1px solid var(--line)}
+.eyebrow{font:600 11.5px var(--f-body);letter-spacing:.18em;text-transform:uppercase;color:var(--maya);margin:0 0 4px}
+h2{font:500 clamp(28px,5.4vw,42px)/1.12 var(--f-display);margin:.1em 0 .3em;text-wrap:balance}
+p{margin:1em 0;max-width:58ch}
+.big{font:400 clamp(21px,4.2vw,26px)/1.44 var(--f-display);color:var(--ink);text-wrap:pretty}
+.deva{font:400 clamp(24px,6vw,34px)/1.4 var(--f-deva);color:var(--maya);text-align:center;margin:8px 0}
+.note{color:var(--muted);font-size:14.5px;line-height:1.55}
+.steps{list-style:none;counter-reset:s;padding:0;margin:20px 0 0;display:grid;gap:10px}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:13px 16px;background:color-mix(in srgb,var(--soft) 50%,transparent)}
+.steps li::before{content:counter(s);flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--maya);color:#140d22;font:700 13px var(--f-body);display:grid;place-items:center;margin-top:1px}
+:root[data-theme="light"] .steps li::before{color:#fff}
+
+.wf-map{position:relative;width:100%;aspect-ratio:1.2;max-width:600px;margin:16px auto 8px;border-radius:18px;overflow:hidden;border:1px solid var(--line);
+  background:linear-gradient(180deg, color-mix(in srgb,var(--maya) 14%,transparent), transparent 55%),linear-gradient(0deg, color-mix(in srgb,var(--ink) 6%,transparent), transparent 42%), var(--panel)}
+.wf-grid .h{position:absolute;left:0;right:0;border-top:1px dashed color-mix(in srgb,var(--line) 85%,transparent)}
+.wf-ax{position:absolute;font:600 10px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);opacity:.85}
+.wf-w{position:absolute;transform:translate(-50%,-50%);font:650 clamp(11px,2.9vw,15px) var(--f-body);white-space:nowrap;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--band) 22%,var(--panel));color:var(--ink);box-shadow:0 1px 5px rgba(0,0,0,.25)}
+.wf-w b{color:var(--band)}
+.wf-dot{position:absolute;transform:translate(-50%,-50%);width:auto;max-width:40vw}
+.wf-dot .pt{display:block;width:12px;height:12px;border-radius:50%;margin:0 auto;background:var(--band);box-shadow:0 0 10px color-mix(in srgb,var(--band) 70%,transparent)}
+.wf-dot .lb{display:block;font:600 10px var(--f-body);color:var(--ink);margin-top:3px;max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.85}
+.wf-legend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.wf-legend span{font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.wf-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+.sgroup{margin:14px 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.sgh{display:flex;align-items:center;gap:8px;font:700 13px var(--f-body);letter-spacing:.04em;padding:10px 14px;color:var(--band);background:color-mix(in srgb,var(--band) 12%,transparent)}
+.sgh i{width:9px;height:9px;border-radius:50%;background:var(--band)}
+.srow{display:flex;align-items:baseline;gap:10px;padding:9px 14px;border-top:1px solid var(--line)}
+.srow .st{font-weight:600;font-size:15px}
+.srow .sa{color:var(--muted);font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .sl{font:700 13px var(--f-body);color:var(--band);font-variant-numeric:tabular-nums}
+
+.connect{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.cbtn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  border-radius:14px;padding:13px 18px;font:600 15px var(--f-body);cursor:pointer;min-height:50px}
+.cbtn:hover{border-color:var(--maya)}
+.cbtn .d{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.cbtn.on .d{background:#1DB954}
+.cbtn.apple.on .d{background:#FA2D48}
+.tracks{display:grid;gap:8px;margin:16px 0}
+.trk{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--panel)}
+.trk img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex:0 0 auto;background:var(--soft)}
+.trk .m{min-width:0;flex:1}
+.trk .t{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trk .a{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trk .lvl{font:700 13px var(--f-body);color:var(--band,var(--maya));white-space:nowrap;font-variant-numeric:tabular-nums}
+.statline{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.stat{border:1px solid var(--line);border-radius:14px;padding:12px 16px;background:var(--panel);min-width:120px}
+.stat b{display:block;font:700 1.5em var(--f-body);line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:.82em;margin-top:3px}
+.setup{border:1px dashed color-mix(in srgb,var(--maya) 55%,transparent);border-radius:14px;padding:14px 16px;margin:14px 0;background:color-mix(in srgb,var(--maya) 6%,transparent)}
+.setup input{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px}
+.setup ol{margin:6px 0 0;padding-left:1.2em;color:var(--muted);font-size:14px;line-height:1.6}
+.setup code{font:13px ui-monospace,Menlo,monospace;background:var(--soft);padding:1px 6px;border-radius:6px;word-break:break-all}
+.msg{color:var(--muted);font-size:14px;margin:8px 0}
+.sig{margin-top:34px;font:300 15px/1.8 var(--f-body);color:var(--muted)}
+.sig b{font:400 27px var(--f-script);color:var(--maya);display:block;margin-top:4px}
+footer{padding-block:46px;text-align:center;color:var(--muted);font-size:13px}
+footer .d{font:400 20px var(--f-deva);color:var(--maya)}
+@media (prefers-reduced-motion:reduce){.orb{animation:none!important}.lineT,.lineS{transition:none!important}.scrollcue{animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="toggles"><button type="button" class="tb" id="themebtn">Light</button></div>
+
+<section class="stage" id="stage">
+  <div class="orb" id="orb" aria-hidden="true"></div>
+  <div class="intro" id="intro">
+    <div class="kick">A mantra</div>
+    <h1 class="title">The <em>Way</em> Up</h1>
+    <p class="lede">Maybe you don&#39;t want to change the feeling. Maybe you just want to be held.</p>
+    <p class="isub">Fourteen slow lines, in your own words. Let each one sit. Then it takes you up.</p>
+    <div class="ctrl"><button type="button" class="b go" id="startB">Begin</button></div>
+  </div>
+  <div class="run" id="runBox" hidden>
+    <div class="lineT" id="lineT"></div>
+    <div class="lineS" id="lineS"></div>
+  </div>
+  <button type="button" class="tap" id="tap" hidden aria-label="Next line"></button>
+  <div class="dots" id="dots" hidden></div>
+  <div class="ctrl" id="ctrl" hidden>
+    <button type="button" class="b" id="pauseB">Pause</button>
+    <button type="button" class="b" id="againB">Again</button>
+  </div>
+  <div class="hint" id="hint" hidden>tap anywhere to go on</div>
+  <div class="scrollcue" id="scrollcue">scroll &#8595;</div>
+</section>
+
+<section class="band"><div class="wrap">
+  <p class="eyebrow">How you raise a frequency</p>
+  <h2>You don&#39;t measure it. You come present, and you lift from there.</h2>
+  <p class="big">A mantra is an instrument for the mind, and its sounds are words or music. It can take you up, and it can take you down. So you do not let the one in your head be a bad one. You make it empowering, and then you walk it.</p>
+  <ul class="steps">
+    <li>Come present. The laptop. Your hands. The keys. The ring on your finger.</li>
+    <li>Feel your body. The whole of it. It is yours, and you&#39;ve got it.</li>
+    <li>Be grateful you&#39;ve got it, and that other people get to fall in love with it.</li>
+    <li>Your eyes go softer. You feel a little better.</li>
+    <li>And now, only now, you go up. Way up.</li>
+  </ul>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <p class="eyebrow">Words are frequencies</p>
+  <h2>Every word holds someone, and reaches somewhere.</h2>
+  <p>Left to right is who the word holds: only me, me against another, us together, or all of it as one. Bottom to top is how high it reaches.</p>
+  <div class="wf-map" id="wfMap" aria-label="A map of words by who they hold and how high they reach"></div>
+  <div class="wf-legend" id="wfLegend"></div>
+  <p class="note" style="margin-top:10px">The mantra is the walk across it: from low and alone, in <em>mine</em>, to high and open, in <em>one</em>.</p>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <p class="eyebrow">The songs</p>
+  <h2>Your music, already on the ladder.</h2>
+  <p class="note">The songs from your own listening, and a few of Maya&#39;s picks, each sitting at the height it carries. The highest at the top. Connect your account below and your live songs drop in beside these.</p>
+  <div id="songList"></div>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <p class="eyebrow">Your music, on the map</p>
+  <h2>Connect your songs and see where they sit.</h2>
+  <p class="note">Sign in and this pulls your real top and recent songs, and places each one on the same map by how high it feels. Your listening, live. Nothing is stored anywhere but on your own phone.</p>
+
+  <div class="connect">
+    <button type="button" class="cbtn" id="spotBtn"><span class="d"></span>Connect Spotify</button>
+    <button type="button" class="cbtn apple" id="appleBtn"><span class="d"></span>Connect Apple Music</button>
+  </div>
+
+  <div class="setup" id="spotSetup" hidden>
+    <b>One-time setup for Spotify</b>
+    <p class="note" style="margin:.4em 0">Spotify asks every app to be registered once. Two minutes, on your account:</p>
+    <ol>
+      <li>Open <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com/dashboard</a> and log in.</li>
+      <li>Create app. Any name. Redirect URI must be exactly: <code id="redirUri"></code></li>
+      <li>Tick <b>Web API</b>, save, open the app, copy its <b>Client ID</b>, paste it here:</li>
+    </ol>
+    <input type="text" id="cidInput" placeholder="Paste your Spotify Client ID" autocomplete="off" spellcheck="false">
+    <p class="msg" id="setupMsg"></p>
+  </div>
+
+  <p class="msg" id="musicMsg"></p>
+  <div class="statline" id="musicStats" hidden></div>
+  <div class="wf-map" id="yourMap" hidden aria-label="Your songs placed by how high they feel"></div>
+  <div class="tracks" id="trackList"></div>
+</div></section>
+
+<section class="band"><div class="wrap">
+  <div class="deva">&#2309;&#2346; &#2332;&#2364;&#2367;&#2306;&#2342;&#2366; &#2349;&#2368; &#2351;&#2375; &#2325;&#2364;&#2354;&#2350; &#2361;&#2376;</div>
+  <p class="big" style="text-align:center">Even now, the pen is alive. The instrument is in your hand. You feel what is true, and then you play the way up.</p>
+  <p class="sig" style="text-align:center">Your mantra, set free as its own place. Open it any time.<b>Maya</b></p>
+</div></section>
+
+<footer><span class="d">&#2309;&#2346;&#2344;&#2366;</span> &middot; and there you go</footer>
+
+<script>
+/* ---- config. SPOTIFY_CLIENT_ID is filled once the app is registered.
+   Until then the page asks for it once and remembers it on this phone. ---- */
+var CONFIG = {
+  SPOTIFY_CLIENT_ID: "",      /* baked in after registration; else localStorage */
+  APPLE_DEV_TOKEN: ""         /* needs an Apple Developer MusicKit key */
+};
+var REDIRECT_URI = location.origin + location.pathname;
+
+(function(){
+  /* theme */
+  var root=document.documentElement, tb=document.getElementById('themebtn');
+  function cur(){return root.getAttribute('data-theme')||'dark';}
+  function paintT(){tb.textContent=cur()==='light'?'Dark':'Light';}
+  tb.addEventListener('click',function(){root.setAttribute('data-theme',cur()==='light'?'dark':'light');
+    try{localStorage.setItem('wayup-theme',root.getAttribute('data-theme'));}catch(e){}paintT();});
+  try{root.setAttribute('data-theme',localStorage.getItem('wayup-theme')||'dark');}catch(e){root.setAttribute('data-theme','dark');}
+  paintT();
+
+  /* ---- the mantra ---- */
+  var STEPS=[
+    {t:"Come to the present.", s:"Just here. Nothing to fix."},
+    {t:"The laptop in front of you.", s:""},
+    {t:"Your hands.", s:"The keys under them."},
+    {t:"The ring on your finger.", s:"The अंगूठी. Feel it sitting there."},
+    {t:"Now feel your body.", s:"The whole of it."},
+    {t:"It is yours.", s:"You’ve got it."},
+    {t:"Feel grateful that you’ve got it.", s:""},
+    {t:"And that you get to watch other people fall in love with it.", s:""},
+    {t:"Softer now.", s:"Your eyes are softer."},
+    {t:"You’re feeling a little better.", s:""},
+    {t:"And now, only now,", s:"you go up."},
+    {t:"Way up.", s:""},
+    {t:"Damn.", s:""},
+    {t:"And there you go.", s:""}
+  ];
+  var intro=document.getElementById('intro'),runBox=document.getElementById('runBox'),
+      T=document.getElementById('lineT'),S=document.getElementById('lineS'),orb=document.getElementById('orb'),
+      tap=document.getElementById('tap'),dotsW=document.getElementById('dots'),ctrl=document.getElementById('ctrl'),
+      hint=document.getElementById('hint'),scrollcue=document.getElementById('scrollcue'),
+      startB=document.getElementById('startB'),pauseB=document.getElementById('pauseB'),againB=document.getElementById('againB');
+  var i=-1,timer=null,paused=false,DUR=7000;
+  for(var d=0;d<STEPS.length;d++)dotsW.appendChild(document.createElement('i'));
+  var dots=dotsW.querySelectorAll('i');
+  function paintStep(){var st=STEPS[i];T.classList.remove('show');S.classList.remove('show');
+    setTimeout(function(){T.textContent=st.t;S.textContent=st.s||'';T.classList.add('show');if(st.s)S.classList.add('show');},100);
+    for(var k=0;k<dots.length;k++)dots[k].classList.toggle('on',k===i);
+    if(i>=STEPS.length-3)orb.classList.add('bloom');else orb.classList.remove('bloom');}
+  function schedule(){clearTimeout(timer);if(paused||i>=STEPS.length-1)return;timer=setTimeout(nextL,i>=STEPS.length-4?5200:DUR);}
+  function nextL(){if(i>=STEPS.length-1)return;i++;paintStep();schedule();if(i>=STEPS.length-1)hint.textContent='rest here as long as you like';}
+  function begin(){intro.hidden=true;runBox.hidden=false;tap.hidden=false;dotsW.hidden=false;ctrl.hidden=false;hint.hidden=false;
+    if(scrollcue)scrollcue.style.display='none';i=-1;paused=false;pauseB.textContent='Pause';nextL();}
+  startB.addEventListener('click',begin);
+  tap.addEventListener('click',function(){if(i>=STEPS.length-1)return;clearTimeout(timer);nextL();});
+  pauseB.addEventListener('click',function(){paused=!paused;pauseB.textContent=paused?'Resume':'Pause';
+    if(paused){clearTimeout(timer);orb.style.animationPlayState='paused';}else{orb.style.animationPlayState='';schedule();}});
+  againB.addEventListener('click',function(){clearTimeout(timer);orb.classList.remove('bloom');begin();});
+
+  /* ---- the bands + word map ---- */
+  var BANDS=[
+    {c:'#8A7BE6',hi:100,name:'The dark'},{c:'#E06A2E',hi:200,name:'The fire'},
+    {c:'#D08A2A',hi:350,name:'The step'},{c:'#4FB07A',hi:500,name:'The measure'},
+    {c:'#5B8BFF',hi:540,name:'The edge'},{c:'#B79CFF',hi:700,name:'The song'},
+    {c:'#C98BFF',hi:1000,name:'The light'}
+  ];
+  function bandOf(l){for(var b=0;b<BANDS.length;b++){if(l<BANDS[b].hi)return BANDS[b];}return BANDS[BANDS.length-1];}
+  function drawGrid(map){var grid=document.createElement('div');grid.className='wf-grid';
+    for(var g=1;g<BANDS.length;g++){var h=document.createElement('div');h.className='h';h.style.top=(g/BANDS.length*100)+'%';grid.appendChild(h);}
+    map.appendChild(grid);
+    var yh=document.createElement('div');yh.className='wf-ax';yh.textContent='higher ↑';yh.style.left='8px';yh.style.top='8px';map.appendChild(yh);
+    var yl=document.createElement('div');yl.className='wf-ax';yl.textContent='lower ↓';yl.style.left='8px';yl.style.bottom='22px';map.appendChild(yl);}
+  var WORDS=[{w:'mine',x:.10,lvl:60},{w:'fault',x:.12,lvl:40},{w:'alone',x:.16,lvl:80},{w:'I want',x:.20,lvl:135},
+    {w:'against',x:.34,lvl:155},{w:'better than',x:.33,lvl:175},{w:'I can',x:.18,lvl:210},{w:'okay',x:.30,lvl:255},
+    {w:'let',x:.42,lvl:330},{w:'care',x:.55,lvl:420},{w:'love',x:.60,lvl:500},{w:'ours',x:.64,lvl:505},
+    {w:'us',x:.66,lvl:520},{w:'together',x:.70,lvl:545},{w:'we',x:.74,lvl:560},{w:'here',x:.82,lvl:605},
+    {w:'still',x:.85,lvl:615},{w:'is',x:.90,lvl:700},{w:'one',x:.94,lvl:720},{w:'all',x:.95,lvl:735}];
+  var map=document.getElementById('wfMap'),leg=document.getElementById('wfLegend');
+  drawGrid(map);
+  [['me',.08],['me vs other',.33],['us',.66],['all, one',.93]].forEach(function(p){var e=document.createElement('div');
+    e.className='wf-ax';e.textContent=p[0];e.style.left=(p[1]*100)+'%';e.style.bottom='6px';e.style.transform='translateX(-50%)';map.appendChild(e);});
+  /* place the words, then spread any that overlap so none sits on another or clips an edge */
+  (function(){
+    var W=560,H=W/1.2,pad=14;
+    var items=WORDS.map(function(o){
+      var cx=(8+o.x*84)/100*W, cy=Math.max(6,Math.min(92,100-(o.lvl/760*100)))/100*H;
+      return {o:o,cx:cx,cy:cy,ox:cx,oy:cy,w:o.w.length*7.4+34,h:27};
+    });
+    for(var t=0;t<170;t++){
+      for(var a=0;a<items.length;a++)for(var b2=a+1;b2<items.length;b2++){
+        var A=items[a],B=items[b2],dx=B.cx-A.cx,dy=B.cy-A.cy;
+        var ox=(A.w+B.w)/2+8-Math.abs(dx),oy=(A.h+B.h)/2+8-Math.abs(dy);
+        if(ox>0&&oy>0){
+          if(ox<oy){var s=(dx<0?-1:1)*ox/2;A.cx-=s;B.cx+=s;}
+          else{var s2=(dy<0?-1:1)*oy/2;A.cy-=s2;B.cy+=s2;}
+        }
+      }
+      for(var c=0;c<items.length;c++){var it=items[c];
+        it.cx+=(it.ox-it.cx)*0.02; it.cy+=(it.oy-it.cy)*0.02;
+        it.cx=Math.max(pad+it.w/2,Math.min(W-pad-it.w/2,it.cx));
+        it.cy=Math.max(pad+it.h/2,Math.min(H-pad-it.h/2,it.cy));}
+    }
+    items.forEach(function(it){var o=it.o,b=bandOf(o.lvl);var el=document.createElement('span');el.className='wf-w';
+      el.style.setProperty('--band',b.c);el.style.left=(it.cx/W*100)+'%';el.style.top=(it.cy/H*100)+'%';
+      el.innerHTML='<b>&#8226;</b> '+o.w;map.appendChild(el);});
+  })();
+  BANDS.forEach(function(b){var s=document.createElement('span');s.innerHTML='<i style="background:'+b.c+'"></i>'+b.name;leg.appendChild(s);});
+
+  /* ---- the curated songs, by band ---- */
+  var SONGS=[
+    {t:'Fix You',a:'Coldplay',lvl:75},{t:'It’s Not Living (If It’s Not with You)',a:'The 1975',lvl:125},
+    {t:'Eruption',a:'Van Halen',lvl:150},{t:'Let It Go',a:'Idina Menzel',lvl:200},
+    {t:'Ekla Chalo Re',a:'Rabindranath Tagore',lvl:200},{t:'Shake It Off',a:'Taylor Swift',lvl:250},
+    {t:'New Romantics',a:'Taylor Swift',lvl:310},{t:'Kaleidoscope',a:'Coldplay',lvl:350},
+    {t:'Hallelujah',a:'Jeff Buckley',lvl:350},{t:'Piano Concerto No. 21, Andante',a:'Mozart',lvl:400},
+    {t:'Imagine',a:'John Lennon',lvl:500},{t:'Dil Toh Baccha Hai Ji',a:'Rahat Fateh Ali Khan',lvl:500},
+    {t:'Yellow',a:'Coldplay',lvl:500},{t:'Rimjhim Gire Saawan',a:'Kishore Kumar',lvl:500},
+    {t:'Can’t Stop the Feeling!',a:'Justin Timberlake',lvl:540},{t:'What Am I',a:'Why Don’t We',lvl:540},
+    {t:'Gitchee Gitchee Goo',a:'Phineas and Ferb',lvl:540},{t:'Here Comes the Sun',a:'The Beatles',lvl:540},
+    {t:'The Girl with the Flaxen Hair',a:'Debussy',lvl:600},{t:'Clair de Lune',a:'Debussy',lvl:600},
+    {t:'Weightless',a:'Marconi Union',lvl:600},{t:'Silence',a:'Two quiet minutes',lvl:700}
+  ];
+  var songList=document.getElementById('songList');
+  if(songList){
+    var byBand={};SONGS.forEach(function(s){var b=bandOf(s.lvl);(byBand[b.name]=byBand[b.name]||{c:b.c,items:[]}).items.push(s);});
+    BANDS.slice().reverse().forEach(function(b){var g=byBand[b.name];if(!g)return;
+      g.items.sort(function(x,y){return y.lvl-x.lvl;});
+      var wrap=document.createElement('div');wrap.className='sgroup';wrap.style.setProperty('--band',b.c);
+      var rows=g.items.map(function(s){return '<div class="srow"><span class="st">'+esc(s.t)+'</span><span class="sa">'+esc(s.a)+'</span><span class="sl">'+s.lvl+'</span></div>';}).join('');
+      wrap.innerHTML='<div class="sgh"><i></i>'+b.name+'</div>'+rows;songList.appendChild(wrap);});
+  }
+
+  /* ---- Spotify (OAuth 2.0 PKCE, all client-side) ---- */
+  var spotBtn=document.getElementById('spotBtn'),spotSetup=document.getElementById('spotSetup'),
+      cidInput=document.getElementById('cidInput'),setupMsg=document.getElementById('setupMsg'),
+      musicMsg=document.getElementById('musicMsg'),trackList=document.getElementById('trackList'),
+      yourMap=document.getElementById('yourMap'),musicStats=document.getElementById('musicStats');
+  document.getElementById('redirUri').textContent=REDIRECT_URI;
+
+  function clientId(){return CONFIG.SPOTIFY_CLIENT_ID || (localStorage.getItem('wayup-spotify-cid')||'');}
+  function rnd(n){var a=new Uint8Array(n);crypto.getRandomValues(a);
+    return btoa(String.fromCharCode.apply(null,a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'').slice(0,n);}
+  async function challenge(v){var dig=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));
+    return btoa(String.fromCharCode.apply(null,new Uint8Array(dig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+  async function login(){
+    var cid=clientId();
+    if(!cid){spotSetup.hidden=false;cidInput.focus();return;}
+    var v=rnd(96);sessionStorage.setItem('wayup-verifier',v);
+    var c=await challenge(v);
+    var p=new URLSearchParams({client_id:cid,response_type:'code',redirect_uri:REDIRECT_URI,
+      scope:'user-top-read user-read-recently-played',code_challenge_method:'S256',code_challenge:c});
+    location.href='https://accounts.spotify.com/authorize?'+p.toString();
+  }
+  async function exchange(code){
+    var cid=clientId(),v=sessionStorage.getItem('wayup-verifier');
+    var body=new URLSearchParams({client_id:cid,grant_type:'authorization_code',code:code,redirect_uri:REDIRECT_URI,code_verifier:v});
+    var r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body});
+    var j=await r.json();
+    if(j.access_token){sessionStorage.setItem('wayup-token',j.access_token);return j.access_token;}
+    throw new Error(j.error_description||j.error||'token failed');
+  }
+  async function api(path,tok){var r=await fetch('https://api.spotify.com/v1/'+path,{headers:{Authorization:'Bearer '+tok}});
+    if(!r.ok)throw Object.assign(new Error('http '+r.status),{status:r.status});return r.json();}
+
+  /* place a track: height from a felt level. Spotify stopped giving new apps the mood
+     numbers, so we start from a gentle lexicon on the title and let it be a first guess. */
+  var LEX=[[/\b(sad|cry|alone|lonely|broke|hurt|lost|numb|empty|die|death|grief)\b/i,90],
+    [/\b(angry|hate|rage|war|fight|blood|burn)\b/i,150],
+    [/\b(run|fire|wild|fast|hard|rock|storm|drive)\b/i,200],
+    [/\b(ok|try|hope|rise|climb|stronger|brave|courage|move)\b/i,300],
+    [/\b(let|free|dance|shake|fun|party|good|smile|sunshine|happy)\b/i,420],
+    [/\b(love|heart|baby|you|us|together|home|hold|sweet|kiss)\b/i,500],
+    [/\b(joy|shine|sun|light|fly|sky|dream|gold|alive|feeling)\b/i,545],
+    [/\b(peace|calm|still|quiet|slow|rain|moon|breathe|silence|clair|lune|weightless)\b/i,610],
+    [/\b(om|one|god|soul|holy|heaven|eternal|infinite|universe)\b/i,710]];
+  function levelFor(t){var s=(t.name+' '+(t.artists||[]).map(function(a){return a.name;}).join(' ')).toLowerCase();
+    var best=350;for(var k=0;k<LEX.length;k++){if(LEX[k][0].test(s)){best=LEX[k][1];break;}}return best;}
+
+  function renderTracks(tracks){
+    if(!tracks.length){musicMsg.textContent='No songs came back. Play a few and try again.';return;}
+    var scored=tracks.map(function(t){return {t:t,lvl:levelFor(t)};});
+    var avg=Math.round(scored.reduce(function(a,b){return a+b.lvl;},0)/scored.length);
+    var ab=bandOf(avg);
+    musicStats.hidden=false;
+    musicStats.innerHTML='<div class="stat" style="--band:'+ab.c+'"><b style="color:'+ab.c+'">'+ab.name+'</b><span>where your listening sits on average</span></div>'+
+      '<div class="stat"><b>'+tracks.length+'</b><span>songs read from your account</span></div>';
+    /* your map */
+    yourMap.hidden=false;yourMap.innerHTML='';drawGrid(yourMap);
+    var xax=document.createElement('div');xax.className='wf-ax';xax.textContent='your songs';xax.style.left='50%';xax.style.bottom='6px';xax.style.transform='translateX(-50%)';yourMap.appendChild(xax);
+    scored.forEach(function(o,idx){var b=bandOf(o.lvl);var el=document.createElement('div');el.className='wf-dot';
+      el.style.setProperty('--band',b.c);el.style.left=(10+(idx%9)/9*80 + (Math.random()*6-3))+'%';
+      el.style.top=Math.max(7,Math.min(92,100-(o.lvl/760*100)))+'%';
+      el.innerHTML='<span class="pt"></span><span class="lb">'+esc(o.t.name)+'</span>';yourMap.appendChild(el);});
+    /* list */
+    trackList.innerHTML='';
+    scored.forEach(function(o){var b=bandOf(o.lvl);var img=(o.t.album&&o.t.album.images&&o.t.album.images.slice(-1)[0])?o.t.album.images.slice(-1)[0].url:'';
+      var el=document.createElement('div');el.className='trk';el.style.setProperty('--band',b.c);
+      el.innerHTML=(img?'<img src="'+img+'" alt="">':'<div style="width:44px;height:44px;border-radius:8px;background:var(--soft)"></div>')+
+        '<div class="m"><div class="t">'+esc(o.t.name)+'</div><div class="a">'+esc((o.t.artists||[]).map(function(a){return a.name;}).join(', '))+'</div></div>'+
+        '<div class="lvl">'+o.lvl+'</div>';trackList.appendChild(el);});
+    musicMsg.textContent='These are your real songs. The levels are a first feel, from the words in each title. Move them in your head, or tell Maya and she will tune them to you.';
+  }
+  function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+  async function loadMusic(tok){
+    musicMsg.textContent='Reading your songs…';
+    try{
+      var top=await api('me/top/tracks?limit=30&time_range=medium_term',tok);
+      var tracks=(top.items||[]);
+      if(tracks.length<5){var rec=await api('me/player/recently-played?limit=30',tok);
+        (rec.items||[]).forEach(function(it){if(it.track)tracks.push(it.track);});}
+      var seen={},uniq=[];tracks.forEach(function(t){if(t&&!seen[t.id]){seen[t.id]=1;uniq.push(t);}});
+      spotBtn.classList.add('on');spotBtn.firstChild.nextSibling&&(spotBtn.lastChild.textContent='Spotify connected');
+      spotBtn.innerHTML='<span class="d"></span>Spotify connected';spotBtn.classList.add('on');
+      renderTracks(uniq.slice(0,24));
+    }catch(e){
+      if(e.status===401){sessionStorage.removeItem('wayup-token');musicMsg.textContent='The session expired. Tap Connect Spotify again.';}
+      else musicMsg.textContent='Could not read your songs ('+(e.message||e)+').';
+    }
+  }
+
+  spotBtn.addEventListener('click',function(){
+    var tok=sessionStorage.getItem('wayup-token');
+    if(tok){loadMusic(tok);return;}
+    login();
+  });
+  cidInput.addEventListener('change',function(){
+    var v=cidInput.value.trim();
+    if(/^[0-9a-f]{32}$/i.test(v)){localStorage.setItem('wayup-spotify-cid',v);setupMsg.textContent='Saved. Tap Connect Spotify.';spotSetup.hidden=true;login();}
+    else setupMsg.textContent='That does not look like a Client ID (32 letters and numbers). Copy it from your app page.';
+  });
+
+  /* handle the redirect back from Spotify */
+  (function(){var q=new URLSearchParams(location.search);
+    if(q.get('code')){var code=q.get('code');history.replaceState({},'',REDIRECT_URI);
+      exchange(code).then(loadMusic).catch(function(e){musicMsg.textContent='Sign-in did not complete ('+(e.message||e)+').';});}
+    else if(q.get('error')){history.replaceState({},'',REDIRECT_URI);musicMsg.textContent='Spotify sign-in was cancelled.';}
+    else if(sessionStorage.getItem('wayup-token')){/* stay quiet until tapped */}
+  })();
+
+  /* ---- Apple Music (needs a MusicKit developer token) ---- */
+  var appleBtn=document.getElementById('appleBtn');
+  appleBtn.addEventListener('click',function(){
+    if(!CONFIG.APPLE_DEV_TOKEN){
+      musicMsg.textContent='Apple Music needs a developer key that only an Apple Developer account can make. Maya can wire it up the moment you have one. Spotify works now.';
+      return;
+    }
+    if(!window.MusicKit){var s=document.createElement('script');s.src='https://js-cdn.music.apple.com/musickit/v3/musickit.js';
+      s.onload=appleGo;document.head.appendChild(s);}else appleGo();
+  });
+  async function appleGo(){try{await MusicKit.configure({developerToken:CONFIG.APPLE_DEV_TOKEN,app:{name:'The Way Up',build:'1'}});
+    var mk=MusicKit.getInstance();await mk.authorize();appleBtn.classList.add('on');appleBtn.innerHTML='<span class="d"></span>Apple Music connected';
+    musicMsg.textContent='Apple Music connected. Pulling recent plays…';
+    var r=await mk.api.music('v1/me/recent/played/tracks',{limit:25});
+    var items=(r&&r.data&&r.data.data)||[];
+    var tracks=items.map(function(x){return {id:x.id,name:x.attributes.name,artists:[{name:x.attributes.artistName}],
+      album:{images:[{url:(x.attributes.artwork?x.attributes.artwork.url.replace('{w}','80').replace('{h}','80'):'')}]}};});
+    renderTracks(tracks);
+  }catch(e){musicMsg.textContent='Apple Music did not connect ('+(e.message||e)+').';}}
+})();
+</script>
+</body>
+</html>
