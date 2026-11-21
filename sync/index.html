@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E0B14">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Two Speakers">
+<link rel="apple-touch-icon" href="icon.png">
 <title>Two Speakers</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -161,8 +166,9 @@ a{color:var(--accent-soft)}
   var peer=null, conn=null, isHost=false, roomCode='';
   var ctx=null;                       // AudioContext
   var clockOffset=0, rttBest=1e9;     // hostNow - myNow (ms)
-  var nudgeMs=0;
+  var nudgeMs=0, vol=1;
   try{ nudgeMs=parseInt(localStorage.getItem('twospk-nudge')||'0',10)||0; }catch(e){}
+  try{ vol=parseFloat(localStorage.getItem('twospk-vol')||'1')||1; }catch(e){}
 
   /* ---------- helpers ---------- */
   function code4(){var a='ABCDEFGHJKLMNPQRSTUVWXYZ',s='';for(var i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return s;}
@@ -216,7 +222,7 @@ a{color:var(--accent-soft)}
       if(at>=c.currentTime-0.01 && at<horizon){
         var s=c.createBufferSource(); s.buffer=CLICK;
         var g=c.createGain(); g.gain.value=(k%4===0)?1:0.5;
-        s.connect(g); g.connect(c.destination);
+        s.connect(g); g.connect(outNode());
         try{ s.start(at); }catch(e){}
       }
     }
@@ -237,7 +243,7 @@ a{color:var(--accent-soft)}
     var startLocalEpoch=hostEpochToLocal(startHostEpoch)+nudgeMs;
     var delay=(startLocalEpoch-now())/1000;
     stopFile();
-    fileSrc=c.createBufferSource(); fileSrc.buffer=fileBuf; fileSrc.connect(c.destination);
+    fileSrc=c.createBufferSource(); fileSrc.buffer=fileBuf; fileSrc.connect(outNode());
     if(delay>=0){ fileSrc.start(c.currentTime+delay); }
     else { fileSrc.start(c.currentTime, Math.min(-delay, fileBuf.duration-0.05)); }  // started late: skip in
   }
@@ -277,6 +283,7 @@ a{color:var(--accent-soft)}
     if(m.t==='autoburst'){ return onAutoBurst(m); }
     if(m.t==='autosnip'){ return onAutoSnip(m); }
     if(m.t==='setnudge'){ return setNudgeLocal(m.ms, true); }
+    if(m.t==='setvol'){ return setVolLocal(m.frac, true); }
   }
 
   /* ---------- file transfer (host -> guest) ---------- */
@@ -317,8 +324,9 @@ a{color:var(--accent-soft)}
     var p=new Peer(id,{debug:1});
     return p;
   }
-  function becomeHost(){
-    isHost=true; roomCode=code4();
+  function becomeHost(savedCode){
+    isHost=true; roomCode=savedCode||code4();
+    saveRoom('host',roomCode);
     $('roleTag').textContent='host'; $('guestWait').classList.add('hid'); $('hostControls').classList.remove('hid');
     enterRoom();
     peer=makePeer(peerId(roomCode));
@@ -327,7 +335,7 @@ a{color:var(--accent-soft)}
     peer.on('error', function(e){ $('peerText').textContent='broker error: '+(e.type||e); });
   }
   function becomeGuest(code){
-    isHost=false; roomCode=code;
+    isHost=false; roomCode=code; saveRoom('guest',code);
     $('roleTag').textContent='second speaker'; $('hostControls').classList.add('hid'); $('guestWait').classList.remove('hid');
     enterRoom(); $('roomCode').textContent=code;
     peer=makePeer(null);
@@ -385,11 +393,30 @@ a{color:var(--accent-soft)}
   }
   function setNudgeLocal(ms, fromRemote){ nudgeMs=parseInt(ms,10)||0; applyNudgeUI(); try{localStorage.setItem('twospk-nudge',String(nudgeMs));}catch(e){}
     if(fromRemote){ var am=$('autoMsg'); if(am) am.textContent='lined up by the other phone: shifted '+Math.abs(nudgeMs)+' ms.'; } }
+  var out=null;
+  function outNode(){ var c=audio(); if(!out){ out=c.createGain(); out.gain.value=vol; out.connect(c.destination); } return out; }
+  function setVolLocal(frac, fromRemote){ vol=Math.max(0.1,Math.min(1,frac)); if(out) out.gain.value=vol; try{localStorage.setItem('twospk-vol',String(vol));}catch(e){}
+    var vn=$('volNum'); if(vn) vn.textContent=Math.round(vol*100); var vs=$('vol'); if(vs) vs.value=Math.round(vol*100); }
   $('nudge').addEventListener('input', function(){
     nudgeMs=parseInt(this.value,10); applyNudgeUI();
     try{ localStorage.setItem('twospk-nudge', String(nudgeMs)); }catch(e){}
   });
-  $('leaveBtn').addEventListener('click', function(){ try{ send({t:'stop'}); }catch(e){} location.reload(); });
+  $('leaveBtn').addEventListener('click', function(){ try{ send({t:'stop'}); }catch(e){} forgetRoom(); location.reload(); });
+
+  /* ---------- remember the room so it rejoins by itself ---------- */
+  function saveRoom(role,code){ try{ localStorage.setItem('twospk-room', JSON.stringify({role:role,code:code})); }catch(e){} }
+  function forgetRoom(){ try{ localStorage.removeItem('twospk-room'); }catch(e){} }
+  (function autoRejoin(){
+    var s=null; try{ s=JSON.parse(localStorage.getItem('twospk-room')||'null'); }catch(e){}
+    if(s&&s.code&&s.role){
+      var tip=document.createElement('div'); tip.className='note'; tip.style.margin='0 0 12px';
+      tip.innerHTML='Reconnecting to your room <b>'+s.code+'</b>… &nbsp;<a href="#" id="freshLink">start fresh</a>';
+      landing.insertBefore(tip, landing.firstChild);
+      var fl=document.getElementById('freshLink');
+      if(fl) fl.addEventListener('click', function(ev){ ev.preventDefault(); forgetRoom(); location.reload(); });
+      setTimeout(function(){ if(s.role==='host') becomeHost(s.code); else becomeGuest(s.code); }, 500);
+    }
+  })();
 
   /* ---------- auto line-up: both mics + cross-correlation (Jai's logic) ---------- */
   var micStream=null, micSrc=null, hostArmed=false, guestReady=false, autoRunning=false, NOISE=null;
@@ -459,7 +486,12 @@ a{color:var(--accent-soft)}
     if(D>=0){ hostN=D; guestN=0; } else { hostN=0; guestN=-D; }
     setNudgeLocal(hostN, false);                             // host sets its own
     send({t:'setnudge', ms:guestN});
-    $('autoMsg').textContent='lined up by ear: shifted '+Math.abs(D)+' ms. play a song file to hear it. tap again to refine.';
+    // volume balance: match the two speakers by what each mic heard
+    function rms(a){ var s=0; for(var k=0;k<a.length;k++) s+=a[k]*a[k]; return Math.sqrt(s/a.length)||1e-6; }
+    var rH=rms(h), rG=rms(g), tgt=Math.min(rH,rG);
+    var vH=Math.max(0.3,Math.min(1,tgt/rH)), vG=Math.max(0.3,Math.min(1,tgt/rG));
+    setVolLocal(vH,false); send({t:'setvol', frac:vG});
+    $('autoMsg').textContent='lined up: shifted '+Math.abs(D)+' ms and matched the volume. play a song file to hear it. tap again to refine.';
     autoRunning=false; $('autoBtn').disabled=false;
   }
 
