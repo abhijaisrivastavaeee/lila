@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E0B14">
+<title>Two Speakers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Mukta:wght@300;400;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+<style>
+:root{
+  --bg:#0E0B14; --ink:#F1ECF6; --muted:#9A91AC; --line:#2A2436; --panel:#171222; --panel2:#201936;
+  --accent:#7C3AED; --accent-soft:#B79CFF; --good:#4FB07A; --warn:#D99A2B; --bad:#E0564E;
+  --f-display:"Cormorant Garamond",Georgia,serif;
+  --f-body:"Mukta",-apple-system,system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink);margin:0}
+body{font:400 17px/1.55 var(--f-body);-webkit-font-smoothing:antialiased;
+  padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+.wrap{max-width:460px;margin:0 auto}
+h1{font:600 clamp(34px,10vw,52px)/1 var(--f-display);margin:8px 0 2px;letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--accent-soft)}
+.sub{color:var(--muted);font-size:15px;margin:0 0 20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;margin:12px 0}
+.card h2{font:600 13px var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-soft);margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+input[type=text]{width:100%;font:600 22px var(--f-body);letter-spacing:.18em;text-align:center;text-transform:uppercase;
+  background:var(--bg);border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:14px;margin-bottom:12px}
+input[type=text]::placeholder{letter-spacing:.06em;color:var(--muted);font-weight:400}
+button{font-family:inherit;cursor:pointer}
+.btn{display:block;width:100%;border:none;border-radius:12px;padding:15px;font:700 16px var(--f-body);
+  background:var(--accent);color:#fff;min-height:52px}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.good{background:var(--good);color:#06240f}
+.btn.stop{background:var(--bad);color:#2a0806}
+.btn:disabled{opacity:.4}
+.or{text-align:center;color:var(--muted);font-size:13px;margin:12px 0;letter-spacing:.1em}
+.code{font:700 40px var(--f-body);letter-spacing:.32em;text-align:center;color:var(--accent-soft);margin:6px 0 2px}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:0 0 auto}
+.dot.on{background:var(--good);box-shadow:0 0 10px var(--good)}
+.dot.wait{background:var(--warn)}
+.status{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--muted)}
+.big{font:700 15px var(--f-body)}
+.slider{width:100%;margin:10px 0 2px;accent-color:var(--accent)}
+.nudgeval{font:700 28px var(--f-body);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums}
+.nudgeval span{font-size:14px;color:var(--muted);font-weight:400}
+.tiny{font-size:12.5px;color:var(--muted);line-height:1.5}
+.pill{display:inline-block;font:700 11px var(--f-body);letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--panel2);color:var(--accent-soft)}
+.metric{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);padding:5px 0;border-top:1px solid var(--line)}
+.metric b{color:var(--ink);font-variant-numeric:tabular-nums}
+.seg{display:flex;gap:8px;margin:4px 0 10px}
+.seg button{flex:1;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px;font:600 14px var(--f-body)}
+.seg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.hid{display:none!important}
+.note{background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--ink);line-height:1.5;margin:12px 0}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:18px;line-height:1.6}
+a{color:var(--accent-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Two <em>Speakers</em></h1>
+  <p class="sub">One sound, two phones, two speakers, in sync.</p>
+
+  <!-- LANDING -->
+  <div id="landing">
+    <div class="card">
+      <h2>Start a room</h2>
+      <button class="btn" id="hostBtn">Create a room</button>
+      <p class="tiny" style="margin:10px 0 0">You get a 4-letter code. The other person types it on their phone.</p>
+    </div>
+    <div class="or">or</div>
+    <div class="card">
+      <h2>Join a room</h2>
+      <label for="joinCode">Room code</label>
+      <input type="text" id="joinCode" maxlength="4" placeholder="ABCD" autocomplete="off" spellcheck="false" inputmode="latin">
+      <button class="btn ghost" id="joinBtn">Join</button>
+    </div>
+    <div class="note">
+      <b>Before you start:</b> pair phone 1 to your Emberton II over Bluetooth, and phone 2 to your Emberton III. Each phone drives one speaker. This app lines up the two phones so the sound lands together. It never touches anything inside the speakers.
+    </div>
+  </div>
+
+  <!-- ROOM -->
+  <div id="room" class="hid">
+    <div class="card">
+      <div class="row" style="align-items:flex-start">
+        <div style="flex:2">
+          <h2 style="margin-bottom:4px">Room</h2>
+          <div class="code" id="roomCode">----</div>
+        </div>
+        <div style="flex:1;text-align:right">
+          <span class="pill" id="roleTag">host</span>
+        </div>
+      </div>
+      <div class="status" style="margin-top:8px"><span class="dot" id="peerDot"></span><span id="peerText">waiting for the other phone…</span></div>
+      <div class="metric"><span>clock offset</span><b id="mOffset">—</b></div>
+      <div class="metric"><span>round trip</span><b id="mRtt">—</b></div>
+    </div>
+
+    <div class="card" id="hostControls">
+      <h2>What plays</h2>
+      <div class="seg" id="srcSeg">
+        <button data-src="click" class="on">Click track</button>
+        <button data-src="file">A song file</button>
+      </div>
+      <div id="clickBox">
+        <label>Tempo <span id="bpmVal" style="color:var(--ink);font-weight:700">100</span> BPM</label>
+        <input type="range" class="slider" id="bpm" min="40" max="200" value="100">
+        <p class="tiny">A steady click is the best way to line the two speakers up by ear. Nudge until the two clicks become one.</p>
+      </div>
+      <div id="fileBox" class="hid">
+        <input type="file" id="audioFile" accept="audio/*" style="width:100%;font-size:13px;color:var(--muted)">
+        <p class="tiny" id="fileMsg" style="margin-top:8px">Pick an audio file. It copies to the other phone, then both play it together.</p>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn good" id="playBtn" disabled>Play together</button>
+        <button class="btn stop hid" id="stopBtn">Stop</button>
+      </div>
+    </div>
+
+    <div class="card" id="guestWait">
+      <h2>You are the second speaker</h2>
+      <p class="tiny" id="guestMsg">Connected. The host picks what plays. Keep this phone on its speaker and use the nudge below to line yourself up.</p>
+    </div>
+
+    <div class="card">
+      <h2>Line up this speaker</h2>
+      <div class="nudgeval"><span id="nudgeSign"></span><span id="nudgeNum">0</span> <span>ms</span></div>
+      <input type="range" class="slider" id="nudge" min="-300" max="300" value="0" step="5">
+      <p class="tiny">Bluetooth speakers each add their own delay, and the II and III are different. Slide until this phone's sound meets the other one. It is saved on this phone.</p>
+    </div>
+
+    <div class="note" id="spotNote">
+      <b>About Spotify:</b> two phones can't be held in perfect sync while each streams Spotify on its own, so in the same room you'd hear a slight echo. For tight sync the app plays one shared track on both phones. Use the click to calibrate, then play a song file through here. Spotify to a single speaker still works the normal way.
+    </div>
+    <button class="btn ghost" id="leaveBtn" style="margin-top:4px">Leave room</button>
+  </div>
+
+  <p class="foot">Built by Maya. v1, calibrate by ear.<br>Works best with both phones on the same Wi-Fi.</p>
+</div>
+
+<script>
+"use strict";
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var landing=$('landing'), room=$('room');
+  var peer=null, conn=null, isHost=false, roomCode='';
+  var ctx=null;                       // AudioContext
+  var clockOffset=0, rttBest=1e9;     // hostNow - myNow (ms)
+  var nudgeMs=0;
+  try{ nudgeMs=parseInt(localStorage.getItem('twospk-nudge')||'0',10)||0; }catch(e){}
+
+  /* ---------- helpers ---------- */
+  function code4(){var a='ABCDEFGHJKLMNPQRSTUVWXYZ',s='';for(var i=0;i<4;i++)s+=a[Math.floor(Math.random()*a.length)];return s;}
+  function peerId(c){return 'twospk-'+c;}       // namespace on the public broker
+  function now(){return Date.now();}
+  function audio(){ if(!ctx){ ctx=new (window.AudioContext||window.webkitAudioContext)(); } if(ctx.state==='suspended') ctx.resume(); return ctx; }
+  function hostEpochToLocal(h){ return h - clockOffset; }   // convert a host Date.now() to this device's Date.now()
+  function send(o){ if(conn&&conn.open) conn.send(o); }
+
+  /* ---------- clock sync (NTP-ish, guest measures against host) ---------- */
+  var syncTimer=null;
+  function startSync(){
+    stopSync();
+    syncTimer=setInterval(function(){ if(conn&&conn.open) send({t:'ping', t0:now()}); }, 1500);
+  }
+  function stopSync(){ if(syncTimer){clearInterval(syncTimer);syncTimer=null;} }
+  function onPing(m){ send({t:'pong', t0:m.t0, t1:now()}); }         // host answers with its clock
+  function onPong(m){
+    var t2=now(), rtt=t2-m.t0;
+    if(rtt<rttBest || rtt<120){
+      rttBest=Math.min(rttBest,rtt);
+      // host time at the midpoint ~ m.t1 ; my time at midpoint ~ (m.t0+t2)/2
+      clockOffset=m.t1-((m.t0+t2)/2);
+      $('mOffset').textContent=(clockOffset>=0?'+':'')+Math.round(clockOffset)+' ms';
+      $('mRtt').textContent=Math.round(rtt)+' ms';
+    }
+  }
+
+  /* ---------- the audio engines ---------- */
+  var clickState={on:false, startHostEpoch:0, bpm:100, look:null};
+  function clickBuffer(){
+    var c=audio(), sr=c.sampleRate, len=Math.floor(sr*0.03), b=c.createBuffer(1,len,sr), d=b.getChannelData(0);
+    for(var i=0;i<len;i++){ var t=i/sr; d[i]=Math.sin(2*Math.PI*1800*t)*Math.exp(-t*60); }
+    return b;
+  }
+  var CLICK=null;
+  function scheduleClicks(){
+    var c=audio(); if(!CLICK) CLICK=clickBuffer();
+    var period=60/clickState.bpm;                              // seconds per beat
+    // convert the shared start (host epoch) to my audio clock
+    var startLocalEpoch=hostEpochToLocal(clickState.startHostEpoch) + nudgeMs;   // ms
+    var ahead=0.2;                                             // schedule 200ms ahead
+    var horizon=c.currentTime+ahead;
+    // map: audioTime = c.currentTime + (localEpoch - now())/1000
+    function epochToAudio(ms){ return c.currentTime + (ms - now())/1000; }
+    var n=Math.ceil((now() - startLocalEpoch)/1000/period);
+    if(n<0) n=0;
+    for(var k=n;k<n+8;k++){
+      var beatEpoch=startLocalEpoch + k*period*1000;
+      var at=epochToAudio(beatEpoch);
+      if(at>=c.currentTime-0.01 && at<horizon){
+        var s=c.createBufferSource(); s.buffer=CLICK;
+        var g=c.createGain(); g.gain.value=(k%4===0)?1:0.5;
+        s.connect(g); g.connect(c.destination);
+        try{ s.start(at); }catch(e){}
+      }
+    }
+  }
+  function startClicks(startHostEpoch,bpm){
+    clickState.on=true; clickState.startHostEpoch=startHostEpoch; clickState.bpm=bpm;
+    if(clickState.look) clearInterval(clickState.look);
+    scheduleClicks();
+    clickState.look=setInterval(scheduleClicks,100);
+  }
+  function stopClicks(){ clickState.on=false; if(clickState.look){clearInterval(clickState.look);clickState.look=null;} }
+
+  // file playback (shared buffer, scheduled start)
+  var fileBuf=null, fileSrc=null;
+  function playFileAt(startHostEpoch){
+    if(!fileBuf) return;
+    var c=audio();
+    var startLocalEpoch=hostEpochToLocal(startHostEpoch)+nudgeMs;
+    var delay=(startLocalEpoch-now())/1000;
+    stopFile();
+    fileSrc=c.createBufferSource(); fileSrc.buffer=fileBuf; fileSrc.connect(c.destination);
+    if(delay>=0){ fileSrc.start(c.currentTime+delay); }
+    else { fileSrc.start(c.currentTime, Math.min(-delay, fileBuf.duration-0.05)); }  // started late: skip in
+  }
+  function stopFile(){ if(fileSrc){ try{fileSrc.stop();}catch(e){} fileSrc=null; } }
+
+  function stopAll(){ stopClicks(); stopFile(); }
+
+  /* ---------- wire a connection ---------- */
+  function wireConn(c){
+    conn=c;
+    conn.on('open', function(){
+      $('peerDot').className='dot on'; $('peerText').textContent='both phones connected';
+      $('playBtn').disabled=false;
+      if(!isHost){ startSync(); }      // guest drives the clock sync
+    });
+    conn.on('data', onData);
+    conn.on('close', function(){ peerGone(); });
+    conn.on('error', function(){ peerGone(); });
+  }
+  function peerGone(){
+    $('peerDot').className='dot wait'; $('peerText').textContent='the other phone dropped. it can rejoin with the same code.';
+    $('playBtn').disabled=true; stopAll(); stopSync();
+  }
+
+  function onData(m){
+    if(!m||!m.t) { /* maybe file chunk */ if(m&&m.file){ recvFile(m); } return; }
+    if(m.t==='ping') return onPing(m);
+    if(m.t==='pong') return onPong(m);
+    if(m.t==='play'){
+      if(m.mode==='click'){ startClicks(m.start, m.bpm); }
+      else if(m.mode==='file'){ playFileAt(m.start); }
+    }
+    if(m.t==='stop'){ stopAll(); }
+    if(m.t==='filemeta'){ fileIncoming(m); }
+    if(m.t==='filedata'){ recvFileChunk(m); }
+  }
+
+  /* ---------- file transfer (host -> guest) ---------- */
+  var rx={buf:null,offset:0,size:0,name:''};
+  function fileIncoming(m){ rx={buf:new Uint8Array(m.size),offset:0,size:m.size,name:m.name}; $('guestMsg').textContent='receiving "'+m.name+'"…'; }
+  function recvFileChunk(m){
+    var arr=new Uint8Array(m.data);
+    rx.buf.set(arr, rx.offset); rx.offset+=arr.length;
+    if(rx.offset>=rx.size){
+      audio().decodeAudioData(rx.buf.buffer.slice(0), function(b){ fileBuf=b; $('guestMsg').textContent='"'+rx.name+'" ready. waiting for the host to play.'; },
+        function(){ $('guestMsg').textContent='could not read that file.'; });
+    }
+  }
+  function sendFile(file){
+    var reader=new FileReader();
+    $('fileMsg').textContent='reading…';
+    reader.onload=function(){
+      var bytes=new Uint8Array(reader.result);
+      audio().decodeAudioData(reader.result.slice(0), function(b){ fileBuf=b; $('fileMsg').textContent='"'+file.name+'" loaded here. sending to the other phone…'; sendBytes(bytes,file.name); },
+        function(){ $('fileMsg').textContent='could not read that file.'; });
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  function sendBytes(bytes,name){
+    send({t:'filemeta', size:bytes.length, name:name});
+    var CH=16000, i=0;
+    (function next(){
+      if(i>=bytes.length){ $('fileMsg').textContent='"'+name+'" ready on both phones. press Play together.'; return; }
+      var end=Math.min(i+CH,bytes.length);
+      send({t:'filedata', data:bytes.slice(i,end)});
+      i=end;
+      setTimeout(next,8);
+    })();
+  }
+
+  /* ---------- host / guest setup ---------- */
+  function makePeer(id){
+    var p=new Peer(id,{debug:1});
+    return p;
+  }
+  function becomeHost(){
+    isHost=true; roomCode=code4();
+    $('roleTag').textContent='host'; $('guestWait').classList.add('hid'); $('hostControls').classList.remove('hid');
+    enterRoom();
+    peer=makePeer(peerId(roomCode));
+    peer.on('open', function(){ $('roomCode').textContent=roomCode; });
+    peer.on('connection', function(c){ wireConn(c); });   // host is the clock master; only the guest measures the offset
+    peer.on('error', function(e){ $('peerText').textContent='broker error: '+(e.type||e); });
+  }
+  function becomeGuest(code){
+    isHost=false; roomCode=code;
+    $('roleTag').textContent='second speaker'; $('hostControls').classList.add('hid'); $('guestWait').classList.remove('hid');
+    enterRoom(); $('roomCode').textContent=code;
+    peer=makePeer(null);
+    peer.on('open', function(){
+      var c=peer.connect(peerId(code),{reliable:true});
+      wireConn(c);
+    });
+    peer.on('error', function(e){
+      if((e.type||'')==='peer-unavailable'){ $('peerText').textContent='no room with that code. check it and rejoin.'; }
+      else $('peerText').textContent='broker error: '+(e.type||e);
+    });
+  }
+  function enterRoom(){ landing.classList.add('hid'); room.classList.remove('hid'); applyNudgeUI(); }
+
+  /* ---------- UI ---------- */
+  $('hostBtn').addEventListener('click', function(){ audio(); becomeHost(); });
+  $('joinBtn').addEventListener('click', function(){
+    var c=($('joinCode').value||'').trim().toUpperCase();
+    if(c.length!==4){ $('joinCode').focus(); return; }
+    audio(); becomeGuest(c);
+  });
+  $('joinCode').addEventListener('input', function(){ this.value=this.value.toUpperCase().replace(/[^A-Z]/g,''); });
+
+  // source segment
+  var srcMode='click';
+  Array.prototype.forEach.call(document.querySelectorAll('#srcSeg button'), function(b){
+    b.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('#srcSeg button'), function(x){x.classList.remove('on');});
+      b.classList.add('on'); srcMode=b.dataset.src;
+      $('clickBox').classList.toggle('hid', srcMode!=='click');
+      $('fileBox').classList.toggle('hid', srcMode!=='file');
+    });
+  });
+  $('bpm').addEventListener('input', function(){ clickState.bpm=parseInt(this.value,10); $('bpmVal').textContent=this.value; });
+  $('audioFile').addEventListener('change', function(){ if(this.files&&this.files[0]) sendFile(this.files[0]); });
+
+  $('playBtn').addEventListener('click', function(){
+    audio();
+    var start=now()+900;                        // play ~0.9s from now, in HOST epoch
+    if(srcMode==='click'){
+      send({t:'play', mode:'click', start:start, bpm:clickState.bpm});
+      startClicks(start, clickState.bpm);        // host uses its own clock; offset=0 for host
+    } else {
+      if(!fileBuf){ $('fileMsg').textContent='pick a file first.'; return; }
+      send({t:'play', mode:'file', start:start});
+      playFileAt(start);
+    }
+    $('playBtn').classList.add('hid'); $('stopBtn').classList.remove('hid');
+  });
+  $('stopBtn').addEventListener('click', function(){ send({t:'stop'}); stopAll(); $('stopBtn').classList.add('hid'); $('playBtn').classList.remove('hid'); });
+
+  // nudge
+  function applyNudgeUI(){
+    $('nudge').value=nudgeMs; $('nudgeNum').textContent=Math.abs(nudgeMs); $('nudgeSign').textContent=nudgeMs<0?'-':(nudgeMs>0?'+':'');
+  }
+  $('nudge').addEventListener('input', function(){
+    nudgeMs=parseInt(this.value,10); applyNudgeUI();
+    try{ localStorage.setItem('twospk-nudge', String(nudgeMs)); }catch(e){}
+  });
+  $('leaveBtn').addEventListener('click', function(){ try{ send({t:'stop'}); }catch(e){} location.reload(); });
+
+  // host epoch for host itself: clockOffset stays 0 (it is the master). guest measures offset.
+})();
+</script>
+</body>
+</html>
