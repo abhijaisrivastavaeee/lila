@@ -67,12 +67,62 @@ button{font-family:inherit;cursor:pointer}
 .note{background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--ink);line-height:1.5;margin:12px 0}
 .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:18px;line-height:1.6}
 a{color:var(--accent-soft)}
+
+/* ===== Amp theme: Marshall silhouette, Jai's purple soul ===== */
+:root{
+  --bg:#0A0A0B; --ink:#F2EEE6; --muted:#9A9488; --line:#2B2824; --panel:#151413; --panel2:#1F1C19;
+  --accent:#7C3AED; --accent-soft:#B79CFF; --brass:#C9A24B; --brass-soft:#E3C877;
+}
+body{ background:
+   radial-gradient(circle at 1px 1px, rgba(255,255,255,.03) 1px, transparent 1.4px) 0 0/5px 5px,
+   radial-gradient(120% 60% at 50% -8%, rgba(124,58,237,.18), transparent 60%),
+   #0A0A0B; }
+.wrap{ max-width:480px; }
+.card{ background:linear-gradient(#171613,#111010); border:1px solid #2a2622; border-top:1px solid #3a342c;
+   box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 10px 30px rgba(0,0,0,.5); }
+.card h2{ color:var(--brass-soft); letter-spacing:.18em; }
+.plate{ position:relative; margin:6px 0 6px; padding:22px 18px 18px; border-radius:16px;
+  background:linear-gradient(#121110,#0b0a0a); border:1px solid #2a2520;
+  box-shadow:0 14px 44px rgba(0,0,0,.6), 0 0 0 1px rgba(201,162,75,.12) inset; overflow:hidden; }
+.plate::before{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 1px 1px, rgba(255,255,255,.03) 1px, transparent 1.3px) 0 0/4px 4px; opacity:.6; pointer-events:none; }
+.script{ font:400 clamp(44px,13vw,66px)/.9 var(--f-display); color:#F4EFE4; position:relative; }
+.script b{ font-weight:600; } .script .x{ color:var(--accent-soft); font-style:italic; }
+.plateSub{ color:var(--brass); font:600 11px var(--f-body); letter-spacing:.34em; text-transform:uppercase; margin-top:9px; }
+.lamp{ position:absolute; top:18px; right:18px; width:16px; height:16px; border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, #ffd98a, var(--brass) 55%, #6b4f1e 100%); animation:lampPulse 3.4s ease-in-out infinite; }
+@keyframes lampPulse{ 0%,100%{opacity:.75; box-shadow:0 0 10px 2px rgba(227,200,119,.4),0 0 0 4px rgba(227,200,119,.06);} 50%{opacity:1; box-shadow:0 0 18px 5px rgba(227,200,119,.7),0 0 0 6px rgba(227,200,119,.1);} }
+.btn{ background:linear-gradient(#8f5cf4,#6d28d9); box-shadow:0 2px 0 #4c1d95, 0 6px 16px rgba(124,58,237,.35); letter-spacing:.02em; }
+.btn.ghost{ background:linear-gradient(#1b1916,#141210); border:1px solid #39322a; color:var(--brass-soft); box-shadow:none; }
+.btn.good{ background:linear-gradient(#5bb97f,#3f9a63); box-shadow:0 2px 0 #276b42; color:#06240f; }
+.btn.stop{ background:linear-gradient(#e2645c,#c53a30); box-shadow:0 2px 0 #7f1d1a; color:#2a0806; }
+.btn:active{ transform:translateY(2px); box-shadow:none; }
+.pill{ background:rgba(201,162,75,.14); color:var(--brass-soft); }
+.code{ color:var(--brass-soft); text-shadow:0 0 18px rgba(227,200,119,.3); }
+input[type=text]{ color:var(--brass-soft); }
+.slider{ accent-color:var(--brass); }
+.dot.on{ background:var(--brass-soft); box-shadow:0 0 10px var(--brass-soft); }
+#eqBands{ display:flex; gap:3px; align-items:flex-end; justify-content:space-between; padding:8px 0 2px; }
+.eqband{ display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; }
+.eqband input[type=range]{ writing-mode:vertical-lr; direction:rtl; width:26px; height:120px; accent-color:var(--accent); background:transparent; }
+.eqv{ font:700 11px var(--f-body); color:var(--brass-soft); font-variant-numeric:tabular-nums; }
+.eqlab{ font:600 9.5px var(--f-body); color:var(--muted); letter-spacing:.04em; }
+.vu{ display:flex; gap:3px; align-items:flex-end; height:28px; margin:2px 0 6px; }
+.vu i{ flex:1; background:linear-gradient(#3a342c,#201d19); border-radius:2px; height:18%; }
+.vu.on i{ animation:vu 900ms ease-in-out infinite; background:linear-gradient(var(--brass-soft),var(--accent)); }
+.vu i:nth-child(2n){ animation-duration:720ms } .vu i:nth-child(3n){ animation-duration:1150ms } .vu i:nth-child(5n){ animation-duration:600ms }
+@keyframes vu{ 0%,100%{height:14%} 50%{height:96%} }
+.foot .credit{ color:var(--brass); font:600 11px var(--f-body); letter-spacing:.08em; }
+@media (prefers-reduced-motion:reduce){ .lamp,.vu.on i{ animation:none!important } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Two <em>Speakers</em></h1>
-  <p class="sub">One sound, two phones, two speakers, in sync.</p>
+  <div class="plate">
+    <div class="lamp"></div>
+    <div class="script"><b>Two</b> <span class="x">Speakers</span></div>
+    <div class="plateSub">one sound &middot; both amps</div>
+  </div>
+  <p class="sub">Your phone to your speaker, Yash's to his. One sound, lined up.</p>
 
   <!-- LANDING -->
   <div id="landing">
@@ -131,6 +181,14 @@ a{color:var(--accent-soft)}
       </div>
     </div>
 
+    <div class="card hid" id="eqCard">
+      <h2>Equalizer <span class="pill">host</span></h2>
+      <div class="vu on" id="vuBars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div id="eqBands"></div>
+      <div class="row" style="margin-top:12px"><button class="btn ghost" id="eqFlat">Flat</button></div>
+      <p class="tiny">Ten bands, applied to both speakers at once. Only you, the host, move these. (App playback, not Spotify.)</p>
+    </div>
+
     <div class="card" id="guestWait">
       <h2>You are the second speaker</h2>
       <p class="tiny" id="guestMsg">Connected. The host picks what plays. Keep this phone on its speaker and use the nudge below to line yourself up.</p>
@@ -149,13 +207,20 @@ a{color:var(--accent-soft)}
       <p class="tiny">Bluetooth speakers each add their own delay, and the II and III are different. Slide until this phone's sound meets the other one. It is saved on this phone.</p>
     </div>
 
+    <div class="card">
+      <h2>This speaker's volume</h2>
+      <div class="nudgeval"><span id="volNum">100</span> <span>%</span></div>
+      <input type="range" class="slider" id="vol" min="20" max="100" value="100" step="1">
+      <p class="tiny">Balance the two speakers so neither drowns the other. Auto line-up evens this out for you. (App playback, not Spotify.)</p>
+    </div>
+
     <div class="note" id="spotNote">
       <b>About Spotify:</b> two phones can't be held in perfect sync while each streams Spotify on its own, so in the same room you'd hear a slight echo. For tight sync the app plays one shared track on both phones. Use the click to calibrate, then play a song file through here. Spotify to a single speaker still works the normal way.
     </div>
     <button class="btn ghost" id="leaveBtn" style="margin-top:4px">Leave room</button>
   </div>
 
-  <p class="foot">Built by Maya. v1, calibrate by ear.<br>Works best with both phones on the same Wi-Fi.</p>
+  <p class="foot"><span class="credit">Built by Jai in tandem with Maya</span><br>on a very brownie evening, sitting on the carpet.</p>
 </div>
 
 <script>
@@ -258,6 +323,7 @@ a{color:var(--accent-soft)}
       $('peerDot').className='dot on'; $('peerText').textContent='both phones connected';
       $('playBtn').disabled=false; $('autoBtn').disabled=false;
       if(!isHost){ startSync(); }      // guest drives the clock sync
+      else { try{ setEqAll(eqGains, false); }catch(e){} }   // host pushes its shared EQ to the new phone (volume stays per-speaker)
     });
     conn.on('data', onData);
     conn.on('close', function(){ peerGone(); });
@@ -284,6 +350,8 @@ a{color:var(--accent-soft)}
     if(m.t==='autosnip'){ return onAutoSnip(m); }
     if(m.t==='setnudge'){ return setNudgeLocal(m.ms, true); }
     if(m.t==='setvol'){ return setVolLocal(m.frac, true); }
+    if(m.t==='eqband'){ return setEqBand(m.i,m.g,true); }
+    if(m.t==='eqall'){ return setEqAll(m.g,true); }
   }
 
   /* ---------- file transfer (host -> guest) ---------- */
@@ -328,6 +396,7 @@ a{color:var(--accent-soft)}
     isHost=true; roomCode=savedCode||code4();
     saveRoom('host',roomCode);
     $('roleTag').textContent='host'; $('guestWait').classList.add('hid'); $('hostControls').classList.remove('hid');
+    $('eqCard').classList.remove('hid'); buildEqUI();
     enterRoom();
     peer=makePeer(peerId(roomCode));
     peer.on('open', function(){ $('roomCode').textContent=roomCode; });
@@ -393,14 +462,36 @@ a{color:var(--accent-soft)}
   }
   function setNudgeLocal(ms, fromRemote){ nudgeMs=parseInt(ms,10)||0; applyNudgeUI(); try{localStorage.setItem('twospk-nudge',String(nudgeMs));}catch(e){}
     if(fromRemote){ var am=$('autoMsg'); if(am) am.textContent='lined up by the other phone: shifted '+Math.abs(nudgeMs)+' ms.'; } }
-  var out=null;
-  function outNode(){ var c=audio(); if(!out){ out=c.createGain(); out.gain.value=vol; out.connect(c.destination); } return out; }
+  var out=null, eqNodes=null;
+  var EQF=[31,62,125,250,500,1000,2000,4000,8000,16000], EQLAB=['31','62','125','250','500','1k','2k','4k','8k','16k'];
+  var eqGains=[0,0,0,0,0,0,0,0,0,0];
+  try{ var _sg=JSON.parse(localStorage.getItem('twospk-eq')||'null'); if(_sg&&_sg.length===10) eqGains=_sg.map(Number); }catch(e){}
+  function outNode(){ var c=audio(); if(!out){ out=c.createGain(); out.gain.value=vol;
+      eqNodes=EQF.map(function(f,i){ var b=c.createBiquadFilter(); b.type='peaking'; b.frequency.value=f; b.Q.value=1.1; b.gain.value=eqGains[i]; return b; });
+      out.connect(eqNodes[0]); for(var i=0;i<9;i++) eqNodes[i].connect(eqNodes[i+1]); eqNodes[9].connect(c.destination);
+    } return out; }
+  function setEqBand(i,g,fromRemote){ g=Math.max(-12,Math.min(12,Math.round(g))); eqGains[i]=g; outNode(); if(eqNodes&&eqNodes[i]) eqNodes[i].gain.value=g;
+    try{localStorage.setItem('twospk-eq',JSON.stringify(eqGains));}catch(e){}
+    var sl=$('eq'+i); if(sl&&(+sl.value)!==g) sl.value=g; var lb=$('eqv'+i); if(lb) lb.textContent=(g>0?'+':'')+g;
+    if(!fromRemote) send({t:'eqband', i:i, g:g}); }
+  function setEqAll(arr,fromRemote){ outNode(); for(var i=0;i<10;i++){ var g=Math.max(-12,Math.min(12,Math.round(arr[i]||0))); eqGains[i]=g; if(eqNodes&&eqNodes[i])eqNodes[i].gain.value=g; var sl=$('eq'+i); if(sl)sl.value=g; var lb=$('eqv'+i); if(lb)lb.textContent=(g>0?'+':'')+g; }
+    try{localStorage.setItem('twospk-eq',JSON.stringify(eqGains));}catch(e){} if(!fromRemote) send({t:'eqall', g:eqGains.slice()}); }
+  function buildEqUI(){ var wrap=$('eqBands'); if(!wrap||wrap.childElementCount) return;
+    for(var i=0;i<10;i++){ (function(i){ var col=document.createElement('div'); col.className='eqband';
+      var v=document.createElement('div'); v.className='eqv'; v.id='eqv'+i; v.textContent=(eqGains[i]>0?'+':'')+eqGains[i];
+      var sl=document.createElement('input'); sl.type='range'; sl.id='eq'+i; sl.min='-12'; sl.max='12'; sl.step='1'; sl.value=eqGains[i];
+      sl.addEventListener('input', function(){ setEqBand(i, +sl.value, false); });
+      var lab=document.createElement('div'); lab.className='eqlab'; lab.textContent=EQLAB[i];
+      col.appendChild(v); col.appendChild(sl); col.appendChild(lab); wrap.appendChild(col); })(i); } }
   function setVolLocal(frac, fromRemote){ vol=Math.max(0.1,Math.min(1,frac)); if(out) out.gain.value=vol; try{localStorage.setItem('twospk-vol',String(vol));}catch(e){}
     var vn=$('volNum'); if(vn) vn.textContent=Math.round(vol*100); var vs=$('vol'); if(vs) vs.value=Math.round(vol*100); }
   $('nudge').addEventListener('input', function(){
     nudgeMs=parseInt(this.value,10); applyNudgeUI();
     try{ localStorage.setItem('twospk-nudge', String(nudgeMs)); }catch(e){}
   });
+  (function(){ var ve=$('vol'); if(ve){ ve.value=Math.round(vol*100); if($('volNum'))$('volNum').textContent=Math.round(vol*100);
+    ve.addEventListener('input', function(){ setVolLocal(parseInt(this.value,10)/100,false); }); } })();
+  (function(){ var ef=$('eqFlat'); if(ef) ef.addEventListener('click', function(){ setEqAll([0,0,0,0,0,0,0,0,0,0], false); }); })();
   $('leaveBtn').addEventListener('click', function(){ try{ send({t:'stop'}); }catch(e){} forgetRoom(); location.reload(); });
 
   /* ---------- remember the room so it rejoins by itself ---------- */
