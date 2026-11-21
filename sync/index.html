@@ -132,6 +132,12 @@ a{color:var(--accent-soft)}
     </div>
 
     <div class="card">
+      <h2>Auto line-up <span class="pill">beta</span></h2>
+      <p class="tiny" id="autoMsg">Both of you: hold your phone close to your own speaker, then tap below on <b>both</b> phones. It plays two soft chirps and uses the mics to line the speakers up by itself. (This tunes songs played through this app, not Spotify.)</p>
+      <button class="btn ghost" id="autoBtn" disabled style="margin-top:10px">Auto line-up</button>
+    </div>
+
+    <div class="card">
       <h2>Line up this speaker</h2>
       <div class="nudgeval"><span id="nudgeSign"></span><span id="nudgeNum">0</span> <span>ms</span></div>
       <input type="range" class="slider" id="nudge" min="-300" max="300" value="0" step="5">
@@ -244,7 +250,7 @@ a{color:var(--accent-soft)}
     conn=c;
     conn.on('open', function(){
       $('peerDot').className='dot on'; $('peerText').textContent='both phones connected';
-      $('playBtn').disabled=false;
+      $('playBtn').disabled=false; $('autoBtn').disabled=false;
       if(!isHost){ startSync(); }      // guest drives the clock sync
     });
     conn.on('data', onData);
@@ -267,6 +273,10 @@ a{color:var(--accent-soft)}
     if(m.t==='stop'){ stopAll(); }
     if(m.t==='filemeta'){ fileIncoming(m); }
     if(m.t==='filedata'){ recvFileChunk(m); }
+    if(m.t==='autoready'){ guestReady=true; $('autoMsg').textContent='other phone ready. tap Auto line-up here.'; if(hostArmed&&!autoRunning) autoRun(); return; }
+    if(m.t==='autoburst'){ return onAutoBurst(m); }
+    if(m.t==='autosnip'){ return onAutoSnip(m); }
+    if(m.t==='setnudge'){ return setNudgeLocal(m.ms, true); }
   }
 
   /* ---------- file transfer (host -> guest) ---------- */
@@ -373,11 +383,87 @@ a{color:var(--accent-soft)}
   function applyNudgeUI(){
     $('nudge').value=nudgeMs; $('nudgeNum').textContent=Math.abs(nudgeMs); $('nudgeSign').textContent=nudgeMs<0?'-':(nudgeMs>0?'+':'');
   }
+  function setNudgeLocal(ms, fromRemote){ nudgeMs=parseInt(ms,10)||0; applyNudgeUI(); try{localStorage.setItem('twospk-nudge',String(nudgeMs));}catch(e){}
+    if(fromRemote){ var am=$('autoMsg'); if(am) am.textContent='lined up by the other phone: shifted '+Math.abs(nudgeMs)+' ms.'; } }
   $('nudge').addEventListener('input', function(){
     nudgeMs=parseInt(this.value,10); applyNudgeUI();
     try{ localStorage.setItem('twospk-nudge', String(nudgeMs)); }catch(e){}
   });
   $('leaveBtn').addEventListener('click', function(){ try{ send({t:'stop'}); }catch(e){} location.reload(); });
+
+  /* ---------- auto line-up: both mics + cross-correlation (Jai's logic) ---------- */
+  var micStream=null, micSrc=null, hostArmed=false, guestReady=false, autoRunning=false, NOISE=null;
+  var hostSnip=null, guestSnip=null;
+  async function ensureMic(){
+    if(micSrc) return true;
+    try{ micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+      micSrc=audio().createMediaStreamSource(micStream); return true; }catch(e){ return false; }
+  }
+  function noiseBuf(){ var c=audio(),sr=c.sampleRate,len=Math.floor(sr*0.4),b=c.createBuffer(1,len,sr),d=b.getChannelData(0);
+    for(var i=0;i<len;i++){ var w=(i<256?i/256:(i>len-256?(len-i)/256:1)); d[i]=(Math.random()*2-1)*0.6*w; } return b; }
+  function playNoiseRaw(hostEpoch){ var c=audio(); if(!NOISE)NOISE=noiseBuf();
+    var delay=(hostEpochToLocal(hostEpoch)-now())/1000; var s=c.createBufferSource(); s.buffer=NOISE; s.connect(c.destination);
+    if(delay>0) s.start(c.currentTime+delay); }
+  function capture(ms){ var c=audio(),sp=c.createScriptProcessor(2048,1,1),chunks=[],capEpoch=0,started=false,mute=c.createGain(); mute.gain.value=0;
+    sp.onaudioprocess=function(e){ if(!started){started=true;capEpoch=now();} chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+    micSrc.connect(sp); sp.connect(mute); mute.connect(c.destination);
+    return new Promise(function(res){ setTimeout(function(){ try{micSrc.disconnect(sp);}catch(_){} try{sp.disconnect();}catch(_){}
+      var tot=0,i; for(i=0;i<chunks.length;i++)tot+=chunks[i].length; var all=new Float32Array(tot),off=0;
+      for(i=0;i<chunks.length;i++){all.set(chunks[i],off);off+=chunks[i].length;} res({sig:all,capEpoch:capEpoch,sr:c.sampleRate}); }, ms); }); }
+  function downsample(sig,sr,target){ var f=Math.max(1,Math.round(sr/target)),out=new Float32Array(Math.floor(sig.length/f));
+    for(var i=0;i<out.length;i++){ var s=0; for(var k=0;k<f;k++)s+=sig[i*f+k]; out[i]=s/f; } return {sig:out,sr:sr/f}; }
+  function f32toi16(a){ var o=new Int16Array(a.length); for(var i=0;i<a.length;i++){ var v=Math.max(-1,Math.min(1,a[i])); o[i]=v*32767; } return o; }
+  function i16tof32(a){ a=new Int16Array(a); var o=new Float32Array(a.length); for(var i=0;i<a.length;i++) o[i]=a[i]/32767; return o; }
+
+  function armTap(){
+    audio();
+    ensureMic().then(function(ok){
+      if(!ok){ $('autoMsg').textContent='allow the microphone, then tap again.'; return; }
+      if(isHost){ hostArmed=true; if(guestReady&&!autoRunning){ autoRun(); } else { $('autoMsg').textContent='ready. now tap Auto line-up on the other phone.'; } }
+      else { send({t:'autoready'}); $('autoMsg').textContent='ready. tap Auto line-up on the host phone now.'; }
+    });
+  }
+  async function autoRun(){
+    if(autoRunning) return; autoRunning=true; hostSnip=null; guestSnip=null;
+    $('autoBtn').disabled=true; $('autoMsg').textContent='listening to both speakers…';
+    var T0=now()+900; send({t:'autoburst', T0:T0}); playNoiseRaw(T0);
+    var rec=await capture((T0-now())+560); var ds=downsample(rec.sig,rec.sr,8000);
+    hostSnip={sig:ds.sig, sr:ds.sr, capHost:rec.capEpoch}; tryCorrelate();
+  }
+  function onAutoBurst(m){
+    ensureMic().then(async function(ok){
+      if(!ok){ send({t:'autosnip', err:1}); return; }
+      $('autoMsg').textContent='listening…'; playNoiseRaw(m.T0);
+      var rec=await capture((m.T0-now())+560); var ds=downsample(rec.sig,rec.sr,8000);
+      send({t:'autosnip', capHost: rec.capEpoch+clockOffset, sr:ds.sr, data:f32toi16(ds.sig)});
+    });
+  }
+  function onAutoSnip(m){
+    if(m.err){ $('autoMsg').textContent='the other phone could not use its mic. allow it there and retry.'; autoRunning=false; $('autoBtn').disabled=false; return; }
+    guestSnip={sig:i16tof32(m.data), sr:m.sr, capHost:m.capHost}; tryCorrelate();
+  }
+  function tryCorrelate(){
+    if(!hostSnip||!guestSnip) return;
+    var h=hostSnip.sig, g=guestSnip.sig, sr=hostSnip.sr;
+    var baseDiffMs=guestSnip.capHost-hostSnip.capHost;      // guest capture start minus host, in host epoch
+    var maxLag=180, best=0, bestVal=-1e18, energy=0, i;
+    for(i=0;i<h.length;i++) energy+=h[i]*h[i];
+    for(var lagMs=-maxLag; lagMs<=maxLag; lagMs+=1){
+      var shift=Math.round(((lagMs-baseDiffMs)/1000)*sr), acc=0, cnt=0;
+      for(i=0;i<h.length;i+=2){ var j=i+shift; if(j>=0&&j<g.length){ acc+=h[i]*g[j]; cnt++; } }
+      if(cnt>sr*0.1){ acc/=cnt; if(acc>bestVal){ bestVal=acc; best=lagMs; } }
+    }
+    if(energy< (sr*0.0005) || bestVal<=0){ $('autoMsg').textContent='couldn’t hear the speakers clearly. turn the volume up, hold each phone near its speaker, and tap again.'; autoRunning=false; $('autoBtn').disabled=false; return; }
+    var D=Math.round(best);                                  // guest heard later than host by D ms
+    var hostN, guestN;
+    if(D>=0){ hostN=D; guestN=0; } else { hostN=0; guestN=-D; }
+    setNudgeLocal(hostN, false);                             // host sets its own
+    send({t:'setnudge', ms:guestN});
+    $('autoMsg').textContent='lined up by ear: shifted '+Math.abs(D)+' ms. play a song file to hear it. tap again to refine.';
+    autoRunning=false; $('autoBtn').disabled=false;
+  }
+
+  $('autoBtn').addEventListener('click', armTap);
 
   // host epoch for host itself: clockOffset stays 0 (it is the master). guest measures offset.
 })();
