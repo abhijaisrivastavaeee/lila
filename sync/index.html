@@ -398,10 +398,16 @@ input[type=text]{ color:var(--brass-soft); }
     $('roleTag').textContent='host'; $('guestWait').classList.add('hid'); $('hostControls').classList.remove('hid');
     $('eqCard').classList.remove('hid'); buildEqUI();
     enterRoom();
+    hostPeer();
+  }
+  function hostPeer(){
     peer=makePeer(peerId(roomCode));
     peer.on('open', function(){ $('roomCode').textContent=roomCode; });
     peer.on('connection', function(c){ wireConn(c); });   // host is the clock master; only the guest measures the offset
-    peer.on('error', function(e){ $('peerText').textContent='broker error: '+(e.type||e); });
+    peer.on('error', function(e){
+      if((e.type||'')==='unavailable-id' && isHost){ try{peer.destroy();}catch(_){} roomCode=code4(); saveRoom('host',roomCode); $('roomCode').textContent=roomCode; hostPeer(); return; }
+      $('peerText').textContent='broker error: '+(e.type||e);
+    });
   }
   function becomeGuest(code){
     isHost=false; roomCode=code; saveRoom('guest',code);
